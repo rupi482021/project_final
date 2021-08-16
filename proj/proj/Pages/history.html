@@ -1,0 +1,405 @@
+﻿<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>jQuery UI Datepicker - Default functionality</title>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/index.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <link href="css/index.css" rel="stylesheet" />
+    <link href="css/history.css" rel="stylesheet" />
+
+    <script>
+
+        $(document).ready(function () {
+            // Get the element with id="defaultOpen" and click on it
+            document.getElementById("defaultOpen").click();
+
+            var customerData = localStorage.getItem('customer')
+            var customer = JSON.parse(customerData);
+            var userId = customer.Id;
+            ajaxCall("GET", "../api/Video/getVideoByid/" + userId, "", getSuccess, error);
+
+            $(document).on('click', '#checkDate', function () {
+                checkDate(video_data);
+            });
+            flag = 0;
+        });
+
+        function getSuccess(Videos) {
+            video_data = Videos;         
+            console.log(Videos)
+            if (Videos.length == 0) {
+                //alert("no videos!")
+                Swal.fire({
+                    icon: 'error',
+                    title: 'אופס...',
+                    text: 'עדין לא צפית באף סרטון אימון!',
+                    confirmButtonText: 'אוקי'
+                })
+            }
+            else {
+
+                var today = new Date().toJSON().slice(0, 10).replace(/-/g, '-');//התאריך של היום
+                monthT = today.split("-")[1];//החודש של היום
+                yearT = today.split("-")[0];//השנה של היום
+
+
+                str = "<div class='w3-container'>"
+                for (var i = 0; i < Videos.length; i++) {
+                    dateWatch = Videos[i].WatchDate.split('T')[0];//תאריך הצפייה בוידיאו
+
+                    //watchDate = Videos[i].WatchDate
+                    videoPath = Videos[i].Subtitlepath
+                    videoT = Videos[i].Caption
+                    str += "<div class='w3-card-4 divCard'>"
+                    str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                    str += "</header >"
+                    str += "<div class='w3-container'>"
+                    str += "<video class='sizeV' controls='controls'>"
+                    str += "<source src='" + videoPath + "' type='video/mp4' />"
+                    str += "</video>"
+                    str += "<h6>מועד צפייה: " + moment(Videos[i].WatchDate).format('HH:mm, DD-MM-YYYY') + "<h6>"
+                    str += "</div>"
+
+                    str += "</div>"
+                }
+
+                str += "</div>"
+                $("#AllVideos").html(str);
+                checkmonth(Videos);
+                checkyear(Videos);
+                //chackCustom();
+                //$(document).on('click', '#checkDate', function () {
+                //    checkDate(video_data);
+                //});
+            }
+
+        }
+
+        function checkmonth(Videos) {
+            var today = new Date().toJSON().slice(0, 10).replace(/-/g, '-');//התאריך של היום
+            monthT = today.split("-")[1];//החודש של היום
+            yearT = today.split("-")[0];//השנה של היום
+            //console.log(monthT)
+
+            str = ""
+            str = "<div class='w3-container'>"
+            for (var i = 0; i < Videos.length; i++) {
+                dateWatch = Videos[i].WatchDate.split('T')[0];//תאריך הצפייה בוידיאו
+                monthW = dateWatch.split("-")[1];//החודש בו נצפה הסרטון
+                yearW = dateWatch.split("-")[0];//השנה בה נצפה הסרטון
+
+                //console.log(monthW);
+                if (dateWatch == today) {
+                    videoPath = Videos[i].Subtitlepath
+                    videoT = Videos[i].Caption
+                    str += "<div class='w3-card-4 divCard'>"
+                    str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                    str += "</header >"
+                    str += "<div class='w3-container'>"
+                    str += "<video class='sizeV' controls='controls'>"
+                    str += "<source src='" + videoPath + "' type='video/mp4' />"
+                    str += "</video>"
+                    str += "<h6>מועד צפייה: " + moment(Videos[i].WatchDate).format('HH:mm, DD-MM-YYYY') + "<h6>"
+                    str += "</div>"
+
+                    str += "</div>"
+                }
+
+            }
+            str += "</div>"
+            $("#TodayVideos").html(str);
+        }
+
+        function checkyear(Videos) {
+            var today = new Date().toJSON().slice(0, 10).replace(/-/g, '-');//התאריך של היום
+            monthT = today.split("-")[1];//החודש של היום
+            yearT = today.split("-")[0];//השנה של היום
+            //console.log(monthT)
+
+            str = ""
+            str = "<div class='w3-container'>"
+            for (var i = 0; i < Videos.length; i++) {
+                dateWatch = Videos[i].WatchDate.split('T')[0];//תאריך הצפייה בוידיאו
+                monthW = dateWatch.split("-")[1];//החודש בו נצפה הסרטון
+                yearW = dateWatch.split("-")[0];//השנה בה נצפה הסרטון
+
+                //console.log(monthW);
+                if (monthW == monthT && yearW == yearT) {
+                    videoPath = Videos[i].Subtitlepath
+                    videoT = Videos[i].Caption
+                    str += "<div class='w3-card-4 divCard'>"
+                    str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                    str += "</header >"
+                    str += "<div class='w3-container'>"
+                    str += "<video class='sizeV' controls='controls'>"
+                    str += "<source src='" + videoPath + "' type='video/mp4' />"
+                    str += "</video>"
+                    str += "<h6>מועד צפייה: " + moment(Videos[i].WatchDate).format('HH:mm, DD-MM-YYYY') + "<h6>"
+                    str += "</div>"
+
+                    str += "</div>"
+                }
+
+            }
+            str += "</div>"
+            $("#MonthVideos").html(str);
+        }
+
+        function chackCustom() {
+            //str = "<div class='row'>"
+            //str += "<div class='col-sm-4'>תאריך התחלה: <input type='date' id='StartDate'></div>"
+            //str += "<div class='col-sm-4'>תאריך סיום: <input type='date' id='EndDate' ></div>"
+            //str += "<div class='col-sm-4'><button id='checkDate' class= 'button'>חפש</button></div>"
+
+            //str += "</div>"
+            //$("#CustomVideos").html(str);
+
+            //$.datepicker.regional['he'] = {
+            //    closeText: 'סגור',
+            //    prevText: '&#x3C;הקודם',
+            //    nextText: 'הבא&#x3E;',
+            //    currentText: 'היום',
+            //    monthNames: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+            //        'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'],
+            //    monthNamesShort: ['ינו', 'פבר', 'מרץ', 'אפר', 'מאי', 'יוני',
+            //        'יולי', 'אוג', 'ספט', 'אוק', 'נוב', 'דצמ'],
+            //    dayNames: ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'],
+            //    dayNamesShort: ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'שבת'],
+            //    dayNamesMin: ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'שבת'],
+            //    weekHeader: 'Wk',
+            //    dateFormat: 'dd/mm/yy',
+            //    firstDay: 0,
+            //    isRTL: true,
+            //    showMonthAfterYear: false,
+            //    yearSuffix: ''
+            //};
+            //$.datepicker.setDefaults($.datepicker.regional['he']);
+
+            //$("#StartDate").datepicker();
+            //$("#EndDate").datepicker();
+
+            //$(document).on('click', '#checkDate', function () {
+            //    checkDate(video_data);
+            //});
+        }
+
+        function checkDate(Videos) {
+            //str = "<div class='row'>"
+            //str += "<div class='col-sm-4'>תאריך התחלה: <input type='date' id='StartDate'></div>"
+            //str += "<div class='col-sm-4'>תאריך סיום: <input type='date' id='EndDate' ></div>"
+            //str += "<div class='col-sm-4'><button id='checkDate' class= 'button'>חפש</button></div>"
+
+            //str += "</div>"
+            if (flag == 0) {
+                StartDate = $("#StartDate").val();//צריך לוודא ששניהם מלאים ורק אם כן להתחיל בכל פרודצרות למטה\
+                EndDate = $("#EndDate").val();
+
+                console.log(StartDate + " " + EndDate)
+                ////console.log(Videos)
+
+                StartDateday = StartDate.split("-")[2];//השנה של התחלה
+                StartDatemonthT = StartDate.split("-")[1];//החודש של התחלה
+                StartDateyearT = StartDate.split("-")[0];//היום של התחלה
+                console.log(StartDateday + " " + StartDatemonthT + " " + StartDateyearT)
+
+                EndDateday = EndDate.split("-")[2];//השנה של סיום
+                EndDatemonthT = EndDate.split("-")[1];//החודש של סיום
+                EndDateyearT = EndDate.split("-")[0];//היום של סיום
+                console.log(EndDateday + " " + EndDatemonthT + " " + EndDateyearT)
+
+                str = ""
+                str = "<div class='w3-container'>"
+                for (var i = 0; i < Videos.length; i++) {
+                    dateWatch = Videos[i].WatchDate.split('T')[0];//תאריך הצפייה בוידיאו
+                    dayW = dateWatch.split("-")[2];//היום בו נצפה הסרטון
+                    monthW = dateWatch.split("-")[1];//החודש בו נצפה הסרטון
+                    yearW = dateWatch.split("-")[0];//השנה בה נצפה הסרטון
+
+                    //console.log(dayW + " " + monthW + " " + yearW);
+
+                    if ((StartDateyearT <= yearW && yearW <= EndDateyearT) &&
+                        (StartDatemonthT <= monthW && monthW <= EndDatemonthT) &&
+                        (StartDateday <= dayW && dayW <= EndDateday)) {
+                        flag = 1;
+                        videoPath = Videos[i].Subtitlepath
+                        videoT = Videos[i].Caption
+                        str += "<div class='w3-card-4 divCard'>"
+                        str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                        str += "</header >"
+                        str += "<div class='w3-container'>"
+                        str += "<video class='sizeV' controls='controls'>"
+                        str += "<source src='" + videoPath + "' type='video/mp4' />"
+                        str += "</video>"
+                        str += "<h6>מועד צפייה: " + moment(Videos[i].WatchDate).format('HH:mm, DD-MM-YYYY') + "<h6>"
+                        str += "</div>"
+
+                        str += "</div>"
+                    }
+
+                }
+                str += "</div>"
+                document.getElementById("CustomVideos1").innerHTML += str;
+            }
+            else {
+                //document.getElementById("CustomVideos1").innerHTML = " " ;
+                StartDate = $("#CustomVideos1").hide();
+                StartDate = $("#StartDate").val();//צריך לוודא ששניהם מלאים ורק אם כן להתחיל בכל פרודצרות למטה\
+                EndDate = $("#EndDate").val();
+
+                console.log(StartDate + " " + EndDate)
+                ////console.log(Videos)
+
+                StartDateday = StartDate.split("-")[2];//השנה של התחלה
+                StartDatemonthT = StartDate.split("-")[1];//החודש של התחלה
+                StartDateyearT = StartDate.split("-")[0];//היום של התחלה
+                console.log(StartDateday + " " + StartDatemonthT + " " + StartDateyearT)
+
+                EndDateday = EndDate.split("-")[2];//השנה של סיום
+                EndDatemonthT = EndDate.split("-")[1];//החודש של סיום
+                EndDateyearT = EndDate.split("-")[0];//היום של סיום
+                console.log(EndDateday + " " + EndDatemonthT + " " + EndDateyearT)
+
+                str = ""
+                str = "<div class='w3-container'>"
+                for (var i = 0; i < Videos.length; i++) {
+                    dateWatch = Videos[i].WatchDate.split('T')[0];//תאריך הצפייה בוידיאו
+                    dayW = dateWatch.split("-")[2];//היום בו נצפה הסרטון
+                    monthW = dateWatch.split("-")[1];//החודש בו נצפה הסרטון
+                    yearW = dateWatch.split("-")[0];//השנה בה נצפה הסרטון
+
+                    //console.log(dayW + " " + monthW + " " + yearW);
+
+                    if ((StartDateyearT <= yearW && yearW <= EndDateyearT) &&
+                        (StartDatemonthT <= monthW && monthW <= EndDatemonthT) &&
+                        (StartDateday <= dayW && dayW <= EndDateday)) {
+                        flag = 1;
+                        videoPath = Videos[i].Subtitlepath
+                        videoT = Videos[i].Caption
+                        str += "<div class='w3-card-4 divCard'>"
+                        str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                        str += "</header >"
+                        str += "<div class='w3-container'>"
+                        str += "<video class='sizeV' controls='controls'>"
+                        str += "<source src='" + videoPath + "' type='video/mp4' />"
+                        str += "</video>"
+                        str += "<h6>מועד צפייה: " + moment(Videos[i].WatchDate).format('HH:mm, DD-MM-YYYY') + "<h6>"
+                        str += "</div>"
+
+                        str += "</div>"
+                    }
+
+                }
+                str += "</div>"
+                document.getElementById("CustomVideos2").innerHTML += str;
+                flag = 1;
+            }
+        }
+        function error(err) {
+            swal("Error: " + err);
+        }
+        function openCity(evt, sorted) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(sorted).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="index.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="customerDeUpdate.html"><i class="fa fa-address-card-o"></i> עדכון פרטים אישיים </a>
+        <a href="recommendTP.html"><i class="fa fa-refresh"></i> התאמת תוכנית אימון </a>
+        <a href="video-favourits.html"><span class="fa fa-heart"></span> סרטונים שאהבתי </a>
+        <a href="questions.html"><span class="fa fa-comments"></span> פורום </a>
+        <a id="active" href="history.html"><i class="fa fa-history"></i> היסטוריה </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+
+    <div id="ph"></div>
+
+    <div class="question-header">
+        <div class="container text-center customer">
+            <h3 id="titleWatch">היסטוריית צפייה</h3>
+        </div>
+    </div>
+
+    <div class="tab">
+        <button class="tablinks" onclick="openCity(event, 'AllVideos')" id="defaultOpen">הכל</button>
+        <button class="tablinks" onclick="openCity(event, 'TodayVideos')">היום</button>
+        <button class="tablinks" onclick="openCity(event, 'MonthVideos')">החודש</button>
+        <button class="tablinks" onclick="openCity(event, 'CustomVideos')">מותאם אישית</button>
+
+    </div>
+
+    <div id="AllVideos" class="tabcontent">
+    </div>
+
+    <div id="TodayVideos" class="tabcontent">
+    </div>
+
+    <div id="MonthVideos" class="tabcontent">
+    </div>
+
+    <div id="CustomVideos" class="tabcontent">
+        <div class='row'>
+            <div class='col-sm-4'>תאריך התחלה: <input type='date' id='StartDate' data-date="" data-date-format="DD MM YYYY"></div>
+            <div class='col-sm-4'>תאריך סיום: <input type='date' id='EndDate' data-date="" data-date-format="DD MM YYYY"></div>
+            <div class='col-sm-4'><button id='checkDate' class='button'>חפש</button></div>
+        </div>
+        <div  id="CustomVideos1"></div>
+        <div  id="CustomVideos2"></div>
+    </div>
+
+</body>
+</html>

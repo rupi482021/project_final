@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <!--<script src="Scripts/jquery-1.10.2.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">-->
+    <script src="../Scripts/jquery-1.10.2.js"></script>
+    <!--<script src="../Scripts/jquery-3.4.1.js"></script>
+    -->
+    <!--<script src="../Scripts/jquery-3.4.1.min.js"></script>-->
+    <script src="../Scripts/bootstrap.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/index.css" rel="stylesheet" />
+
+    <link href="css/favourites.css" rel="stylesheet" />
+    <script>
+        var customerData = localStorage.getItem('customer')
+        var customer = JSON.parse(customerData);
+        $(document).ready(function () {
+
+            $('#notFount').hide();
+
+            $('body').on('click', '.btnRemove', function () {
+                var videoId = $(this).attr('vidId');
+                var userId = customer.Id;
+                jQuery.ajax({
+                    type: "POST",
+                    datatype: "json",
+                    data: JSON.stringify({ videoId: videoId, userId: userId }),
+                    url: "../api/Video/RemoveFromFavourits",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (saved) {
+                        if (saved) {
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'success',
+                                title: 'הסרטון הוסר בהצלחה!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            getFavouritList();
+                        } else {
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'error',
+                                title: 'קרתה תקלה. הסרטון לא הוסר!!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+
+            });
+
+            getFavouritList();
+        });
+
+        function getFavouritList() {
+            var userId = customer.Id;
+            jQuery.ajax({
+                type: "POST",
+                data: customer.Id,
+                url: "../api/Video/Favourits/" + customer.Id,
+                contentType: "application/json",
+                success: function (videos) {
+                    if (videos.length == 0) {
+                        $('#videoContainer').html('');
+                        $('#notFount').show();
+
+                    }
+                    else {
+
+                        str = ""
+                        str = "<div class='row'>"
+                        str += "<div class='w3-container col-sm-12 '>"
+                        for (var i = 0; i < videos.length; i++) {
+                            videoPath = videos[i].Subtitlepath
+                            videoT = videos[i].Caption
+                            videoId = videos[i].VideoId
+                            str += "<div class='w3-card-4 divCard col-sm-3'>"
+                            str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                            str += "</header >"
+                            str += "<div class='w3-container'>"
+                            str += "<video class='sizeV' controls='controls'>"
+                            str += "<source src='" + videoPath + "' type='video/mp4' />"
+                            str += "</video>"
+                            str += "</div>"
+                            str += "<button class='w3-button w3-block w3-dark-grey btnRemove'  vidId=" + videoId + "> הסר</button>"
+                            str += "</div>"
+                        }
+                        str += "</div>"
+                        str += "</div>"
+                        $("#ph").html(str);
+
+
+                        $('#notFount').hide();
+                        $('#videoContainer').html(str);
+                    }
+
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+    </script>
+</head>
+<body cz-shortcut-listen="true">
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="index.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="customerDeUpdate.html"><i class="fa fa-address-card-o"></i> עדכון פרטים אישיים </a>
+        <a href="recommendTP.html"><i class="fa fa-refresh"></i> התאמת תוכנית אימון </a>
+        <a id="active" href="video-favourits.html"><span class="fa fa-heart"></span> סרטונים שאהבתי </a>
+        <a href="questions.html"><span class="fa fa-comments"></span> פורום </a>
+        <a href="history.html"><i class="fa fa-history"></i> היסטוריה </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <br />
+    <h3 id="likevid">סרטונים שאהבתי</h3>
+    <div id="ph"></div>
+</body>
+</html>

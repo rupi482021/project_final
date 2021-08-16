@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!--<script src="../Scripts/jquery-3.4.1.min.js"></script>-->
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <link href="css/index.css" rel="stylesheet" />
+    <link href="css/videosReport.css" rel="stylesheet" />
+
+    <script>
+
+        $(document).ready(function () {
+            ajaxCall("GET", "../api/ManagerReport", "", sucManagerReport, errManagerReport)
+        });
+
+        function sucManagerReport(videosRep) {
+
+            videosRepList = videosRep;
+            console.log(videosRepList);
+            for (var i = 0; i < videosRepList.length; i++) {
+                //str += "<video class='sizeV' controls='controls'>"
+                //str += "<source src='" + videoPath + "' type='video/mp4' />"
+                videosRepList[i].Sub = "<video class='sizeV' controls = 'controls' > <source src='" + videosRepList[i].Sub + "'type='video/mp4' /> </video>";
+            }
+
+            try {
+                tbl = $('#videosTable').DataTable({
+                    data: videosRepList,
+                    pageLength: 5,
+                    columns: [
+                        {
+
+                            render: function (data, type, row, meta) {
+                                let videosData = "data-cattId='" + row.Id + "'";
+                                editBtn = " ";
+                                deleteBtn = " ";
+                                return editBtn + deleteBtn;
+                            }
+                        },
+
+                        { data: "VideoCode" },
+                        { data: "Sub" },
+                        { data: "Description" },
+                        { data: "Caption" },
+                        { data: "CategoryCode" },
+                        { data: "LevelType" },
+                        { data: "NumOfRate" },
+                        { data: "NumOfDislikes" },
+                        { data: "NumOfLikes" },
+                        { data: "PrecOfDislikes" },
+                        { data: "PrecOfLikes" }
+                    ],
+
+                });
+
+            }
+
+            catch (err) {
+                alert(err);
+            }
+        }
+
+        function errManagerReport() {
+            console.log("errManagerReport")
+        }
+
+    </script>
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="ManegerPage.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="NewUser.html"><i class="fa fa-address-card" id="personalDet"></i> יצירת משתמש חדש </a>
+        <a href="index_Content_Upload.html"><i class="fa fa-refresh"></i> תכנים  </a>
+        <a href="UsersReport.html"><span class="fa fa-users"></span> דוח משתמשים </a>
+        <a id="active" href="videosReport.html"><i class="fa fa-eye"></i> דוח צפיות </a>
+        <a href="Categories.html"><span class="fa fa-indent"></span> קטגוריות </a>
+        <a href="QuestionsManger.html"><i class="fa fa-comments"></i> פורום </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <hr /><br />
+    <div class="container" id="formCamp">
+        <form id="Mform">
+            <table id="videosTable" class="display nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>מספר וידאו </th>
+                        <th>סרטון</th>
+                        <th>תאור</th>
+                        <th>כותרת וידאו</th>
+                        <th>מספר קטגוריה</th>
+                        <th>רמת קושי</th>
+                        <th>כמות מדרגים </th>
+                        <th>מספר מתאמנים שלא אהבו</th>
+                        <th>מספר מתאמנים שאהבו</th>
+                        <th>% שלא אהבו</th>
+                        <th>% שאהבו</th>
+                    </tr>
+                </thead>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

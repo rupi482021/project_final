@@ -1,0 +1,600 @@
+﻿<!DOCTYPE html>
+<html lang="he">
+<head>
+
+
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!--<script src="../Scripts/jquery-3.4.1.min.js"></script>-->
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <link href="css/index.css" rel="stylesheet" />
+    <link href="css/Content.css" rel="stylesheet" />
+    <script>
+        var categoryArr = [];
+
+        $(document).ready(function () {
+            mode = "";
+            $("#editDiv").hide();
+            ajaxCall("GET", "../api/category", "", getSuccessCategory, error);
+            ajaxCall("GET", "../api/Tags", "", getSuccessTags, error);
+            ajaxCall("GET", "../api/Content", "", getSuccess, error);
+            $('#Manger').click(addCategory);
+            $('#buttonUpload').on('click', uploadVideo);
+            $("#saveBTN").click(postContent);
+            $("#videocode").hide();
+            $("#cancelSaveBTN").on("click", function () {
+                $("#editDiv").hide();
+                if (mode == "new") $("#Mform").show();
+                mode = "";
+                $("#videocode").hide();
+            });
+
+            $("#newContent").on("click", function () {
+                $("#editDiv").show();
+                $("#videocode").hide();
+                $("#videocodeLA").hide();//ליאור הוסי
+                $('#newContent').hide();
+
+                $("#editDiv :input").prop("disabled", false);
+                $('#idVideo*').attr('disabled', true);
+
+                document.getElementById("nameVideo").value = ""
+                document.getElementById("description").value = ""
+
+                mode = "new";
+                $("#Mform").hide();
+                $("#saveBTN").show();
+                clearFields();
+            });
+
+            $("#editDiv").hide();
+
+
+
+
+        });
+
+        function clearFields() {
+            $("#nameVideo").val("");
+            $("#nameCategory").val("");
+            $("#videofiles").val("");
+            $("#description").val("");
+            $("#checkboxes").val("");
+        }
+
+        function deleteSuccess(data) {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: "הוידיאו נמחק בהצלחה!",
+                showConfirmButton: false,
+                timer: 1500
+            }).then(function () {
+                location.reload();
+            }
+       );
+
+        }
+
+        function deletebutton(btn) {
+            mode = "delete";
+            markSelected(btn);
+            let btnSplit = btn.id.split("-");
+
+            Swal.fire({
+                title:'האם אתה בטוח שהינך רוצה למחוק סרטון זה?',
+                //text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'כן',
+                cancelButtonText: 'לא!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ajaxCall("DELETE", "../api/Content/deleteContent/" + btnSplit[1], "", deleteSuccess, error);
+                }
+            })
+
+        }
+
+        function editbutton(btn) {
+            let btnSplit = btn.id.split("-");
+            mode = "edit";
+            markSelected(btn);
+            $("#editDiv").show();
+            $("#saveBTN").show();
+            $("#editDiv :input").attr("disabled", false);
+            $("#saveBTN").prop("disabled", false);
+            $("#cancelSaveBTN").prop("disabled", false);
+            populateFields(btnSplit[1]);
+            $("#videocode").show();
+            $("#videocode").prop("disabled", true);
+
+        }
+
+        // mark the selected row
+        function markSelected(btn) {
+            $("#contentTable tr").removeClass("selected"); // remove seleced class from rows that were selected before
+            row = (btn.parentNode).parentNode; // button is in TD which is in Row
+            row.className = 'selected'; // mark as selected
+        }
+
+        // fill the form fields
+        function populateFields(contId) {
+            content = getContent(contId);
+            $("#nameVideo").val(content.Caption);
+            $("#nameCategory").val(content.CategoryCode);
+            $("#description").val(content.Description);
+            $("#videocode").val(contId);
+
+            ajaxCall("GET", "../api/Tags/getByid/" + contId, "", checkedTags, error);
+
+        }
+
+        function checkedTags(data) {
+
+            for (var i = 0; i < data.length; i++) {
+                $("#tag-" + data[i].Tagcode).attr("checked", true);
+            }
+
+        }
+
+        function getContent(id) {
+            for (i in contentsArr) {
+                if (contentsArr[i].VideoCode == parseInt(id))
+                    return contentsArr[i];
+            }
+            return null;
+        }
+
+        var contentsArr;
+        function getSuccess(contents) {
+            console.log(contents)
+            for (var i = 0; i < contents.length; i++) {
+                let str = "";
+                for (var j = 0; j < contents[i].TagsArray.length; j++) {
+                    if (j == contents[i].TagsArray.length - 1)
+                        str += contents[i].TagsArray[j].Tagname
+                    else
+                        str += contents[i].TagsArray[j].Tagname + ", "
+                }
+                contents[i].TagsArray = str;
+
+                let category = categoryArr.find(item => item.CategoryCode == contents[i].CategoryCode)
+                contents[i].CategoryCode = category.CategoryName;
+
+                contents[i].Subtitlepath = "<video controls = 'controls' > <source src='" + contents[i].Subtitlepath + "' type='video/mp4' /> </video>";
+                //contents[i].Subtitlepath = "<video controls = 'controls' > <source src='../" + contents[i].Subtitlepath + "'type='video/mp4' /> </video>";
+
+            }
+            contentsArr = contents;
+
+            try {
+                tbl = $('#contentTable').DataTable({
+                    data: contentsArr,
+                    pageLength: 3,
+                    columns: [
+                        {
+                            render: function (data, type, row, meta) {
+                                //let dataContent = "data-contId='" + row.editbutton + "'";
+                                editBtn = "<button type='button' class = 'editBtn btn btn-success' id='btn-" + row.VideoCode + "' onclick='editbutton(this)'" + contents + "> ערוך </button>";
+                                deleteBtn = "<button type='button' class = 'deleteBtn btn btn-danger' id='btnDelete-" + row.VideoCode + "' onclick='deletebutton(this)' " + contents + "> מחק </button>";
+                                return editBtn + deleteBtn;
+                            }
+                        },
+
+                        { data: "CategoryCode" },
+                        { data: "VideoCode" },
+                        { data: "Caption" },
+                        { data: "Description" },
+                        { data: "TagsArray" },
+                        { data: "Subtitlepath" },
+                    ],
+
+                });
+
+            }
+
+            catch (err) {
+                swal({
+                    title: err,
+                    text: err,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true
+                })
+                //alert(err);
+            }
+        }
+
+        function error(err) {
+            swal("Error: " + err);
+        }
+
+        function addCategory() {
+            window.location = "ManegerPage.html"
+        }
+
+        function getSuccessCategory(categoryData) {
+            categoryArr = categoryData;
+            str = '<option value="">בחר קטגוריה</option>';
+            for (var i = 0; i < categoryData.length; i++) {
+                str += '<option id="' + categoryData[i].CategoryCode + '" value="' + categoryData[i].CategoryName + '">' + categoryData[i].CategoryName + '</option>';
+            }
+            $("#nameCategory").html(str);
+        }
+
+        var tagsArr;
+
+        function getSuccessTags(tagData) {
+            tagsArr = tagData;
+            str1 = " ";
+            for (var i = 0; i < tagData.length; i++) {
+                str1 += "<label for='" + tagData[i].Tagcode + "'>"
+                str1 += "<input type='checkbox' id='tag-" + tagData[i].Tagcode + "' />" + tagData[i].Tagname
+                str1 += "</label>"
+            }
+            $("#checkboxes").html(str1);
+        }
+
+        var videoData = "";
+
+        function uploadVideo() {
+
+            var data = new FormData();
+            var files = $("#videofiles").get(0).files;
+
+
+            //if (files[0].size > 78213408) {
+            //    alert("File is too big!");
+            //    files.value = "";
+            //}
+            //else {
+                $("#contentForm").prop("disabled", true);
+                if (files.length > 0) {
+                    for (f = 0; f < files.length; f++) {
+                        data.append("video", files[f]);
+                    }
+                    let nameVideo = $("#nameVideo").val();
+                    data.append("name", nameVideo);
+
+                    $.ajax({
+                        type: "POST",
+                        url: "../api/Content/uploadVideo",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: showVideo,
+                        error: errorVideo
+                    });
+
+                }
+            //}
+            //return false
+        }
+
+
+        function showVideo(data) {
+            console.log(data);
+            //alert("The video was added");
+
+            //Swal.fire({
+            //    position: 'center',
+            //    icon: 'success',
+            //    title: "הסרטון הועלה!",
+            //    showConfirmButton: false,
+            //    timer: 1500
+            //})
+            str1 = "הסרטון הועלה!";
+            $("#ph").html(str1);
+
+            videoData = data[0];
+            $("#Mform").prop("disabled", false);
+            //postContnet();
+        }
+
+        function errorVideo(data) {
+            console.log(data);
+        }
+
+        function postContent() {
+            sel = document.getElementById("nameCategory");
+            categoryId = sel.options[sel.selectedIndex].id;
+            categoryName = sel.options[sel.selectedIndex].value;
+            VidName = $("#nameVideo").val();
+            VidDesc = $("#description").val();
+            tags = $('input[type=checkbox]:checked');
+            tagsArr = [];
+            for (var i = 0; i < tags.length; i++) {
+                let tagId = tags[i].id.split("-");
+                let tag = {
+                    Tagcode: tagId[1],
+                    TagName: tags[i].nextSibling.data
+                }
+                tagsArr.push(tag);
+
+            }
+            if (mode == "new") {
+                if (videoData != "") {
+
+                    Video = videoData;
+
+                    let Content = {
+                        Description: VidDesc,
+                        Caption: VidName,
+                        Subtitlepath: Video,
+                        CategoryCode: categoryId,
+                        TagsArray: tagsArr
+                    }
+
+                    ajaxCall("POST", "../api/Content", JSON.stringify(Content), postSuccess, postError)
+                    return false;
+ד
+                }
+                else {
+                    swal({
+                        title: "לא נבחר סרטון!",
+                        text: err,
+                        icon: "warning",
+                        buttons: true,
+                        dangerMode: true
+                    })
+
+                }
+
+            }
+
+            else {
+                //update
+                Video = videoData;
+                let videoCode = $("#videocode").val();
+
+                let Content = {
+                    VideoCode: videoCode,
+                    Description: VidDesc,
+                    Caption: VidName,
+                    Subtitlepath: Video,
+                    CategoryCode: categoryId,
+                    TagsArray: tagsArr
+                }
+                ajaxCall("PUT", "../api/Content/updateContent", JSON.stringify(Content), putSuccess, postError)
+                return false;
+                window.location = "index_Content_Upload.html";
+
+            }
+
+        }
+
+        function putSuccess(data) {
+            //Swal.fire({
+            //    position: 'center',
+            //    icon: 'success',
+            //    title: "העדכון בוצע בהצלחה!",
+            //    showConfirmButton: false,
+            //    timer: 750000
+            //})
+            ////window.location = "index_Content_Upload.html";
+            //location.reload();
+
+            //swal({
+            //    title: "הצלחנו!",
+            //    text: "העדכון בוצע בהצלחה!",
+            //    icon: 'success',
+            //    type: "success"
+            //}).then(function () {
+            //    location.reload();
+            //}
+            //);
+
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: "העדכון בוצע בהצלחה!",
+                showConfirmButton: false,
+                timer: 1500
+            })
+                .then(function () {
+                    location.reload();
+                }
+                );
+
+        }
+
+        function postSuccess(data) {
+            //console.log(data)
+            //Swal.fire({
+            //    position: 'center',
+            //    icon: 'success',
+            //    title: "הסרטון : " + data + " התווסף בהצלחה!",
+            //    showConfirmButton: false,
+            //    timer: 1500
+            //})
+            //window.location.reload();
+
+            //swal({
+            //    title: "הצלחנו!",
+            //    text: "הסרטון: " + data + " התווסף בהצלחה!",
+            //    icon: 'success',
+            //    type: "success"
+            //}).then(function () {
+            //    location.reload();
+            //}
+            //);
+
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                text: "הסרטון: " + data + " התווסף בהצלחה!",
+                showConfirmButton: false,
+                timer: 1500
+            }).then(function () {
+                location.reload();
+            }
+            );
+
+        }
+
+
+        function postError(err) {
+            console.log(err.responseJSON.Message);
+            //alert("could not add the Content");
+            //swal({
+            //    title: "אין אפשרות להעלות את הסרטון",
+            //    text: err,
+            //    icon: "warning",
+            //    buttons: true,
+            //    dangerMode: true
+            //})
+
+            swal({
+                title: "שים לב!",
+                text: "אין אפשרות להעלות את הסרטון!",
+                text: err,
+                icon: 'warning',
+                type: "warning"
+            }).then(function () {
+                location.reload();
+            }
+            );
+        }
+
+        var expanded = false;
+        function showCheckboxes() {
+            var checkboxes = document.getElementById("checkboxes");
+            if (!expanded) {
+                checkboxes.style.display = "block";
+                expanded = true;
+            } else {
+                checkboxes.style.display = "none";
+                expanded = false;
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="ManegerPage.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="NewUser.html"><i class="fa fa-address-card" id="personalDet"></i> יצירת משתמש חדש </a>
+        <a id="active" href="index_Content_Upload.html"><i class="fa fa-refresh"></i> תכנים </a>
+        <a href="UsersReport.html"><span class="fa fa-users"></span> דוח משתמשים </a>
+        <a href="videosReport.html"><i class="fa fa-eye"></i> דוח צפיות </a>
+        <a href="Categories.html"><span class="fa fa-indent"></span> קטגוריות </a>
+        <a href="QuestionsManger.html"><i class="fa fa-comments"></i> פורום </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <hr />
+    <div id="ph"> </div>
+          <div class="container" id="formCamp">
+              <button type="submit" class="addContentButton" id="newContent">הוסף תוכן חדש</button><br />
+              <form id="Mform">
+                  <table id="contentTable" class="display nowrap" style="width:100%">
+                      <thead>
+                          <tr>
+                              <th></th>
+                              <th>שם קטגוריה</th>
+                              <th>קוד סרטון</th>
+                              <th>שם סרטון</th>
+                              <th>תיאור סרטון</th>
+                              <th>תגיות</th>
+                              <th>סרטון</th>
+                          </tr>
+                      </thead>
+                  </table>
+              </form>
+
+              <br /> <br />
+              <div id="editDiv">
+                  <form id="contentForm">
+                      <div class="form-group row">
+
+                          <div class="form-group col-sm-3">
+
+                          </div>
+
+                          <div class="form-group col-sm-3">
+                              <label for="model" id="videocodeLA"><span class="red-star">★ </span>קוד סרטון</label>
+                              <input type="text" class="form-control" id="videocode" placeholder="">
+                          </div>
+
+                          <div class="form-group col-sm-3">
+                              <label for="model"><span class="red-star">★ </span>שם סרטון</label>
+                              <input type="text" class="form-control" id="nameVideo" placeholder="הכנס שם סרטון" required>
+                          </div>
+
+
+                          <div class="form-group col-sm-3">
+                              <label for="year"><span class="red-star">★ </span>שם קטגוריה</label>
+                              <select id="nameCategory" class="form-control" required></select>
+                          </div>
+
+                      </div>
+
+                      <div class="form-group row">
+                          <div class="form-group col-sm-3">
+
+                          </div>
+
+                          <div class="form-group col-sm-3">
+                              <label for="discountCodeTB"><span class="red-star">★ </span>הוספת סרטון</label>
+                              <!--accept="video/*"    אמור להיכנס שורה מתחת-->
+                              <input type="file" accept="video/mp4" max-size="58213408" id="videofiles" name="files" multiple="multiple" />
+                              <button type="button" class="buttonUpL" id="buttonUpload">העלה סרטון</button>
+                              <div id="ph1"></div>
+                          </div>
+                          <div class="form-group col-sm-3">
+                              <label for="description">תיאור סרטון</label>
+                              <textarea rows="6" class="form-control" id="description" placeholder="הכנס תיאור קצר לסרטון"></textarea>
+                          </div>
+                          <div>
+                              <div class="form-group col-sm-3 multiselect">
+                                  <div class="selectBox" onclick="showCheckboxes()">
+                                      <select>
+                                          <option>בחר תגית</option>
+                                      </select>
+                                      <div class="overSelect"></div>
+                                  </div>
+                                  <div id="checkboxes">
+                                      <label for="one">
+                                          <input type="checkbox" id="one" />
+                                      </label>
+                                      <label for="two">
+                                          <input type="checkbox" id="two" />Second checkbox
+                                      </label>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+                      <button type="submit" class="btn btn-primary btn-lg" id="saveBTN">שמור</button>
+                      <!--<input type="button" class="btn btn-warning btn-lg" id="cancelSaveBTN" value="Cancel" />-->
+                  </form>
+              </div>
+
+          </div>
+    <!--<div>
+        <img class="back" src="../imgesFileProject/bands-removebg-preview.png" />
+    </div>-->
+</body>
+</html>

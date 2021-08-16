@@ -1,0 +1,520 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="../Scripts/jquery-1.10.2.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/index.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <!--<link href="css/question.css" rel="stylesheet" />-->
+    <style>
+        .pull-left {
+            float: left;
+        }
+
+        #txtAnswer {
+            width: 100%;
+        }
+
+        #btnWaitingQuestions {
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            font-family: Tahoma;
+        }
+
+        .answerBy {
+            margin-right: auto;
+            margin-left: -10px;
+        }
+
+        .search-area-wrapper {
+            z-index: -1;
+            position: relative;
+            background-size: 100%;
+            background-image: url('../Images/istockphoto.jpg');
+            min-height: 279px;
+            height: auto !important;
+            height: 279px;
+        }
+
+
+
+        .card-header:first-child {
+            background-color: #cccccc;
+            font-weight: bold;
+            font-family: Tahoma;
+            color: black;
+            font-size: 15px;
+        }
+
+        .card-body {
+            background-color: white;
+            font-family: Tahoma;
+            color: black;
+        }
+
+        b, strong {
+            font-size: 15px;
+        }
+
+
+        .search-area-wrapper .search-area {
+            padding: 50px 0;
+        }
+
+        .search-area-theme-option {
+            background-size: cover;
+            background-position: center;
+        }
+
+        h3 {
+            font-family: Tahoma;
+            font-weight: bold;
+            font-size: 30px;
+            color: #fff;
+            text-align: center;
+        }
+
+        p {
+            font-size: 18px;
+            font-family: Tahoma;
+        }
+
+        h3.search-header {
+            font-family: Tahoma;
+            font-weight: bold;
+            font-size: 30px;
+            color: #fff;
+            text-align: center;
+        }
+
+        p.search-tag-line {
+            font-family: Tahoma;
+            font-style: italic;
+            font-size: 12px;
+            line-height: 28px;
+            color: #fff;
+            text-align: center;
+        }
+
+        #btnAddQuestion {
+            width: 130px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: Tahoma;
+            margin-right: 10px;
+        }
+
+        .question-details {
+            position: absolute;
+            left: 7px;
+            top: 7px;
+        }
+
+
+        .question-header {
+            min-height: 279px;
+            position: relative;
+            background-size: 100%;
+            background-image: url('Images/istockphoto.jpg');
+            min-height: 279px;
+            padding-top: 80px;
+            color: #fff;
+            opacity: 0.9;
+        }
+
+        .swal2-container:not(.swal2-top):not(.swal2-top-start):not(.swal2-top-end):not(.swal2-top-left):not(.swal2-top-right):not(.swal2-center-start):not(.swal2-center-end):not(.swal2-center-left):not(.swal2-center-right):not(.swal2-bottom):not(.swal2-bottom-start):not(.swal2-bottom-end):not(.swal2-bottom-left):not(.swal2-bottom-right):not(.swal2-grow-fullscreen) > .swal2-modal {
+            font-family: Tahoma;
+        }
+
+        #btnSearchQuestion {
+            width: 22%;
+            color: #fff;
+            font-family: Tahoma;
+            background-color: #e21e25;
+            border-color: #e21e25;
+        }
+
+        #btnClearSearch {
+            width: 15%;
+            color: #fff;
+            font-family: Tahoma;
+            background-color: #332c2c;
+            border-color: #332c2c;
+        }
+    </style>
+    <script>
+        var allQuestions = [];
+        var allUsers = [];
+        var answered = [];
+        var notAnswered = [];
+        var selectedQuestion = null;
+        var customerData = localStorage.getItem('customer')
+        var customer = JSON.parse(customerData);
+        $(document).ready(function () {
+            //מסתירים את הכפתור של המנהל
+            $('#btnWaitingQuestions').hide();
+            //בודקים את התפקיד של המשתמש שנכנס ומציגים לו את המסך
+            if (customer.Role == 'M') {
+                $('.container.manager').show();
+                $('#managerName').html(customer.Email);
+                $('.container.customer').hide();
+            } else {
+                $('.container.manager').hide();
+                $('.container.customer').show();
+            }
+
+
+            $('#btnAddQuestion').click(function () {
+                var userId = customer.Id;
+                var questionText = $('#txtNewQuestion').val();
+                if (!questionText) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'אופס...',
+                        text: 'לא הוזנה שאלה!',
+                        confirmButtonText: 'אוקי'
+                    })
+                    return;
+                }
+
+                //בונים את האוביקט שאלה שתשלח לשרת
+                var question = {
+                    UserId: userId,
+                    ManagerId: -1,
+                    QuestionText: questionText
+                }
+                //קריאת שרת ליצירת שאלה
+                jQuery.ajax({
+                    type: "POST",
+                    datatype: "json",
+                    data: JSON.stringify(question),
+                    url: "../api/Question",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (saved) {
+                        if (saved) {
+                            $('#txtNewQuestion').val('');
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'success',
+                                title: 'שאלתך נשלחה ותענה בהקדם!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            getQuestions();
+                        } else {
+                            //alert('not saved');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'אופס...',
+                                text: 'משהו השתבש!',
+                                confirmButtonText: 'אוקי'
+                            })
+                        }
+
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            })
+
+            $('#btnAnswer').click(function () {
+                var answer = $('#txtAnswer').val();
+
+                selectedQuestion.Answer = answer;
+                selectedQuestion.ManagerId = customer.Id;
+
+                jQuery.ajax({
+                    type: "POST",
+                    data: JSON.stringify(selectedQuestion),
+                    url: "../api/Question/UpdateQuestion",
+                    contentType: "application/json",
+                    success: function (saved) {
+
+                        getQuestions();
+                        $('#txtAnswer').val('');
+                        $('#managerModal').modal('hide');
+
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            });
+
+            $('#btnDeleteAnswer').click(function () {
+                var questionId = selectedQuestion.Id
+
+                jQuery.ajax({
+                    type: "DELETE",
+                    data: JSON.stringify(selectedQuestion),
+                    url: "../api/Question/" + questionId,
+                    contentType: "application/json",
+                    success: function (saved) {
+
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: 'השאלה נמחקה בהצלחה ',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(function () {
+                            location.reload();
+
+                        });
+
+                        //alert('השאלה נמחקה בהצלחה');
+                        getQuestions();
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            });
+
+            $('body').on('click', '.naQuestion', function () {
+
+                //מסירים את הקלאס אקטיב מכל אחד מהשאלות
+                $('.naQuestion').each(function (i, el) {
+                    $(el).removeClass('active');
+                });
+
+                //מוסיפים את האלקס אקטיב לשאלה הרלוונטית
+                $(this).addClass('active');
+                var qid = $(this).attr('qId');
+                selectedQuestion = notAnswered.find(function (q) {
+                    return q.Id == qid;
+                })
+            })
+
+            $('#btnWaitingQuestions').click(function () {
+                $('#managerModal').modal('show');
+            })
+
+            $('#btnSearchQuestion').click(function () {
+                var searchTerm = $('#txtSearchQuestion').val();
+                var filteredQuestions = allQuestions.filter(q => {
+                    return q.QuestionText.includes(searchTerm) || (q.Answer && q.Answer.includes(searchTerm));
+                });
+                applyQuestions(filteredQuestions);
+            });
+
+            $('#btnClearSearch').click(function () {
+                $('#txtSearchQuestion').val('');
+
+                applyQuestions(allQuestions);
+            });
+
+            getAllUsers();
+        });
+
+        function getAllUsers() {
+            jQuery.ajax({
+                type: "GET",
+                data: {},
+                url: "../api/customer",
+                contentType: "application/json",
+                success: function (users) {
+                    allUsers = users;
+                    getQuestions();
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        function getQuestions() {
+            jQuery.ajax({
+                type: "GET",
+                data: {},
+                url: "../api/Question",
+                contentType: "application/json",
+                success: function (questions) {
+                    allQuestions = questions;
+                    answered = questions.filter(q => q.Status == true);
+                    notAnswered = questions.filter(q => q.Status == false);
+
+                    if (notAnswered.length > 0) {
+
+                        var notAnsweredStr = '';
+                        notAnswered.forEach(function (na) {
+                            var notAnsweredQuestionUser = getUserbyQuestion(na.UserId, allUsers);
+                            setUserToQuestion(na, notAnsweredQuestionUser);
+                            notAnsweredStr +=
+                                '<button type="button" class="list-group-item list-group-item-action naQuestion" qId="' + na.Id + '">' +
+                                na.QuestionText
+                                + ' <b class="pull-left mx-3">' + moment(na.Created).format('DD-MM-YYYY') + '</b>'
+                                + ' <b class="pull-left">' + na.user.FullName + '</b>' +
+                                '</button > ';
+                        });
+
+                        $('#notAnsweredContainer').html(notAnsweredStr);
+                        $('#btnWaitingQuestions').find('span').html(notAnswered.length);
+                    }
+                    else {
+                        $('#btnWaitingQuestions').find('span').html('0');
+                    }
+
+                    if (customer.Role == 'M') {
+                        $('#btnWaitingQuestions').show();
+                    }
+
+                    applyQuestions(questions);
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        function setUserToQuestion(question, user) {
+            user.FullName = user.FirstName + ' ' + user.SurName;
+            question.user = user;
+        }
+
+        function getUserbyQuestion(userId, users) {
+            var user = users.find(u => u.Id == userId);
+            if (user) { return user; }
+        }
+
+        function applyQuestions(questions) {
+            if (questions.length > 0) {
+                var answeredStr = '';
+                questions.forEach(function (ans) {
+                    //שולפים את המשתמש ששאל את השאלה לפי המספר זיהוי שלו
+                    questionUser = allUsers.find(function (u) {
+                        return u.Id == ans.UserId;
+                    });
+
+                    // בודקים אם השאלה נענתה לפי הסטטוס ואם כן מחפשים את המנהל שענה עליה
+                    if (ans.Status == true) {
+                        answeredUser = allUsers.find(function (u) {
+                            return u.Id == ans.ManagerId;
+                        });
+                        ans.answeredBy = answeredUser.FirstName + ' ' + answeredUser.SurName;
+                    }
+
+                    ans.createdBy = questionUser.FirstName + ' ' + questionUser.SurName;
+
+                    answeredStr +=
+                        '<div class="card text-white bg-dark mt-3">' +
+                        '<div class="card-header" >' +
+                        ans.QuestionText +
+                        '<div class="question-details"> <sapn>' + moment(ans.Created).format('DD-MM-YYYY') +
+                        '</span> <b>' + ans.createdBy + '<b/> </div>' +
+                        '</div >' +
+                        '<div class="card-body">';
+                    if (ans.Status == true) {
+                        answeredStr += '<div class="d-flex align-items-center mb-0">' +
+                            '<p>' + ans.Answer + '</p>' +
+                            '<p class="answerBy"> <span class="ml-2">' + moment(ans.AnswerDate).format('DD-MM-YYYY') + '</span><b>' + ans.answeredBy + '</b></p>' +
+                            '</div>';
+                    }
+                    answeredStr += '</div>' +
+                        '</div >';
+                });
+
+                $('#answeredContainer').html(answeredStr);
+            }
+        }
+
+    </script>
+</head>
+<body cz-shortcut-listen="true">
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="ManegerPage.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="NewUser.html"><i class="fa fa-address-card" id="personalDet"></i> יצירת משתמש חדש </a>
+        <a href="index_Content_Upload.html"><i class="fa fa-refresh"></i> תכנים  </a>
+        <a href="UsersReport.html"><span class="fa fa-users"></span> דוח משתמשים </a>
+        <a href="videosReport.html"><i class="fa fa-eye"></i> דוח צפיות </a>
+        <a href="Categories.html"><span class="fa fa-indent"></span> קטגוריות </a>
+        <a id="active" href="QuestionsManger.html"><i class="fa fa-comments"></i> פורום </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <br />
+    <div class="question-header">
+        <div class="container text-center customer">
+            <h3>יש לך שאלה?</h3>
+            <p class="">
+                כתבי אותה ואחד המאמנים שלנו יחזור אליך עם תשובה 😊
+            </p>
+            <div class="d-flex align-items-center justify-content-center">
+                <input type="text" id="txtNewQuestion" class="form-control flex-1" value="" />
+                <a id="btnAddQuestion" class="btn btn-dark">שלח שאלה</a>
+            </div>
+        </div>
+        <div class="search-area container manager">
+            <button class="btn btn-light" id="btnWaitingQuestions">
+                <span></span>
+                שאלות שלא נענו
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            </button>
+            <h3 class="search-header">פורום שאלות תשובות</h3>
+            <p class="search-tag-line">
+                שלום
+                <span id="managerName"></span>
+                בפורום זה תוכל לענות על שאלות המשתמשים
+            </p>
+        </div>
+    </div>
+    <div>
+        <div class="d-flex align-items-center justify-content-center mx-auto mt-4" style="width:82%">
+            <input type="text" id="txtSearchQuestion" class="form-control flex-1" value="" />
+            <a id="btnSearchQuestion" class="btn btn-primary mx-2">סנן לפי מילות שאלה</a>
+            <a id="btnClearSearch" class="btn btn-danger">נקה סינון</a>
+        </div>
+    </div>
+    <div class="container" id="answeredContainer">
+    </div>
+    <div class="modal fade" id="managerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        שאלות שלא נענו
+                    </h5>
+                    <button style="margin:0" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="list-group" id="notAnsweredContainer">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label>תשובה</label>
+                            <textarea rows="10" id="txtAnswer"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary1" id="btnAnswer">ענה</button>
+                    <button class="btn btn-primary ml-2" id="btnDeleteAnswer">מחק</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

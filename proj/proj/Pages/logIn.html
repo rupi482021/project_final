@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/logIn.css" rel="stylesheet" />
+    <script src="../../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            $("#LogI").submit(logIn);
+            ajaxCall("GET", "../api/customer", "", sucsFun, erroeFun)
+        });
+
+        function sucsFun() {
+
+            console.log("succerror")
+        }
+
+        function erroeFun() {
+
+            console.log("tryerror")
+        }
+
+        function logIn() {
+
+            logInCheck()
+            return false;
+        }
+
+        function logInCheck(dataLogIn) {
+
+            emailLogIn = $("#email").val();
+            passwordLogIn = $("#password").val();
+            ajaxCall("GET", "../api/customer?email=" + emailLogIn + "&password=" + passwordLogIn, " ", postSuccessUserLogIn, postErrorUserLogIn)
+        }
+
+        function postSuccessUserLogIn(customer) {
+
+            a = customer;
+            p = document.getElementById("password").value
+            e = document.getElementById("email").value
+
+            if ((a.Role == 'M')) {
+                localStorage.setItem('customer', JSON.stringify(a));
+                window.location = "ManegerPage.html"
+            }
+
+            else if ((a.Email == e) && (p == a.Password) && (a.FirstName != null)) {
+
+                localStorage.setItem('customer', JSON.stringify(a));
+                window.location = "index.html"
+            }
+
+            else if ((a.FirstName == null) && (a.Email == e) && (p == a.Password)) {
+
+                localStorage.setItem('customer', JSON.stringify(a));
+                window.location = "customerForm.html"
+            }
+
+
+            else if ((a.Email == e) && (p != a.Password)) {
+                //swal({
+                //    title: "Incorrect password, please try again",
+                //    text: "",
+                //    icon: "warning",
+                //    dangerMode: true
+                //});
+
+
+                Swal.fire({
+                    position: 'center',
+                    icon: 'warning',
+                    title: 'סיסמא שגויה! נסה שוב',
+                    showConfirmButton: false,
+                    timer: 2500
+                })
+            }
+
+            else {
+
+                //swal({
+                //    title: "User not exists in the system",
+                //    text: "",
+                //    icon: "warning",
+                //    dangerMode: true
+                //});
+
+
+                Swal.fire({
+                    position: 'center',
+                    icon: 'error',
+                    title: '!משתמש לא קיים במערכת',
+                    showConfirmButton: false,
+                    timer: 2500
+                })
+            }
+        }
+
+        function postErrorUserLogIn() {
+            console.log("postErrorUserLogIn")
+        }
+
+
+    </script>
+
+</head>
+<body>
+    <form id="LogI">
+        <p class="logo"><img src="Images/KaautsuIsrael.png" /></p>
+        <div class="container">
+            <label for="uname" class="white">שם משתמש</label>
+            <input id="email" type="text" placeholder="Enter Email" name="uname" required>
+            <label for="psw" class="white">סיסמה</label>
+            <input id="password" type="password" placeholder="Enter Password" name="psw" required>
+            <button type="submit">כניסה</button>
+        </div>
+    </form>
+</body>
+</html>

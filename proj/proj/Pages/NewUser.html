@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!--<script src="../Scripts/jquery-3.4.1.min.js"></script>-->
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <link href="css/index.css" rel="stylesheet" />
+    <link href="css/NewUser.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            $("#saveBTN").click(postProfile);
+
+            customerDet = localStorage.getItem('customer')
+            customerDet = JSON.parse(customerDet);
+
+
+            result = rand(8);
+            //console.log(result);
+            $("#Password").val(result);
+            $('#Password').attr('disabled', true);
+
+        });
+
+        //auto expand textarea
+        function adjust_textarea(h) {
+            h.style.height = "20px";
+            h.style.height = (h.scrollHeight) + "px";
+        }
+
+        function rand(length) {
+            var result = '';
+            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for (var i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+
+
+        function postProfile() {
+            email = $("#Mail").val();
+            Pass = $("#Password").val();
+            role = 'C';
+
+            let profile = {
+                Mail: email,
+                Password: Pass,
+                Role: role
+            }
+
+            ajaxCall("POST", "../api/Profile", JSON.stringify(profile), postSuccess, postError)
+            return false;
+        }
+
+
+        function postSuccess(data) {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: "המשתמש : " + data + " הוקם בהצלחה! ",
+                text: "סיסמה ושם משתמש נשלחו למייל שהוזן" ,
+                showConfirmButton: false,
+                timer: 4000
+            })
+                .then(function () {
+                    location.reload();
+                });
+        }
+
+        function postError(err) {
+            console.log(err.responseJSON.Message);
+
+
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: "מנהל יקר",
+                text: "המשתמש כבר מוקם במערכת!",    
+                icon: 'warning',
+                type: "warning",
+                timer: 4000
+            })
+                .then(function () {
+                    location.reload();
+                });
+
+        }
+
+    </script>
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="ManegerPage.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a id="active" href="NewUser.html"><i class="fa fa-address-card" id="personalDet"></i> יצירת משתמש חדש </a>
+        <a href="index_Content_Upload.html"><i class="fa fa-refresh"></i> תכנים  </a>
+        <a href="UsersReport.html"><span class="fa fa-users"></span> דוח משתמשים </a>
+        <a href="videosReport.html"><i class="fa fa-eye"></i> דוח צפיות </a>
+        <a href="Categories.html"><span class="fa fa-indent"></span> קטגוריות </a>
+        <a href="QuestionsManger.html"><i class="fa fa-comments"></i> פורום </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <hr /><br />
+    <div class="form-style-8">
+        <h2>רישום משתמש חדש</h2>
+        <form>
+            <input type="text" id="Mail" name="field1" placeholder="הכנס מייל" />
+            <input type="email" id="Password" placeholder="סיסמא" />
+
+            <input type="submit" id="saveBTN" value="שלח" />
+        </form>
+    </div>
+</body>
+</html>

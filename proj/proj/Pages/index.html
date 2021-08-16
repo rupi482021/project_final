@@ -1,0 +1,841 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/Full-Size-Drag-Drop-Calendar-Plugin-FullCalendar/fullcalendar.min.js"></script>
+    <link href="https://www.jqueryscript.net/demo/Full-Size-Drag-Drop-Calendar-Plugin-FullCalendar/fullcalendar.min.css" rel="stylesheet" />
+    <script src="../Scripts/datetimepicker-master/datetimepicker-master/build/jquery.datetimepicker.full.min.js"></script>
+    <link href="../Scripts/datetimepicker-master/datetimepicker-master/build/jquery.datetimepicker.min.css" rel="stylesheet" />
+
+    <link href="css/Popup.css" rel="stylesheet" />
+    <link href="css/index.css" rel="stylesheet" />
+    <title></title>
+    <style>
+    </style>
+    <script>
+
+        var allVideos = [];
+        var _userFavouriteVideos = [];
+        $(document).ready(function () {
+            videoList = localStorage.getItem('videoList')
+            videoL = JSON.parse(videoList);
+            customerDet = localStorage.getItem('customer')
+            customerDet = JSON.parse(customerDet);
+            trainingProgramC = localStorage.getItem('trainingProgramC')
+            trainingProgramC = JSON.parse(trainingProgramC);
+
+
+            //ליאור
+            userId = customerDet.Id
+            ajaxCall("GET", "../api/Rank/getRankByid/" + userId, "", getFavouritVideos, error);
+            //ליאור
+
+            $("#personalDet").click(personalDet)
+
+            $("#nextQues").click(opinion2);
+            $("#FinalRank").click(postRank);
+            $("#opinion").hide();
+            str1 = " "
+
+            cusFName = customerDet.FirstName
+            cusLName = customerDet.SurName
+            custTPC = trainingProgramC.Tname
+
+            str1 = "<div class='firstLast mb-4'>" + "היי " + cusFName + " " + cusLName + "," + "</br>" + "אלו הסרטונים בתוכנית שבחרת: " + "<u>" + "<b>" + custTPC + "</b>" + "</u>" + "</div>"
+            $("#ph1").html(str1);
+
+
+            $('body').on('click', '.btnLike', function () {
+                var videoId = $(this).attr('vidId');
+                var customerData = localStorage.getItem('customer')
+                var customer = JSON.parse(customerData);
+                jQuery.ajax({
+                    type: "POST",
+                    datatype: "json",
+                    data: JSON.stringify({ videoId: videoId, userId: customer.Id }),
+                    url: "../api/Video/Like",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (saved) {
+                        if (saved) {
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'success',
+                                title: 'הסרטון הוסף בהצלחה למועדפים שלך!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(function () {
+                                location.reload();
+                                }
+                            );
+
+                            document.getElementsByClassName("btnLike").disabled = true;
+                            
+
+                        } else {
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'error',
+                                title: 'קרתה תקלה. הסרטון לא הוסף למועדפים שלך!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+
+
+                    },
+                    error: function (response) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'אופס...',
+                            text: 'הסרטון הוסף כבר למועדפים שלך! 😊',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    }
+                });
+
+            });
+
+
+            $('#btnSaveTraining').click(function () {
+
+                var selectedVideo = $('#ddlVideos').val();
+                var customer = getCustomerFromLocalStorage();
+
+                var trainingObject = {
+                    VideoId: selectedVideo,
+                    Date: selectedTrainingDate,
+                    Hour: moment(selectedTrainingDate).hour(),
+                    IsCompleted: false,
+                    CustomerId: customer.Id
+                };
+
+                $.ajax({
+                    type: "POST",
+                    datatype: "json",
+                    data: JSON.stringify(trainingObject),
+                    url: "../api/training",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (saved) {
+                        if (saved) {
+                            //alert("saved");
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'success',
+                                title: 'האימון נשמר והוכנס ליומן!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            $('#createTrainingModal').modal('hide');
+                            getUserTarinings();
+                        } else {
+                            //alert('not saved');
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'error',
+                                title: 'קרתה תקלה. האימון לא נשמר!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+
+            })
+
+            $('#btnTrainingDone').click(function () {
+                $.ajax({
+                    type: "GET",
+                    datatype: "json",
+                    data: {},
+                    url: "../api/Training/TrainingDone/" + $(this).attr('trainingId'),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (trainings) {
+                        if (trainings) {
+
+                            $('#tariningModal').modal('hide');
+                            getUserTarinings();
+
+                        } else {
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'error',
+                                title: 'קרתה תקלה! נסו שוב מאוחר יותר',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            })
+
+            $('#btnTrainingDelete').click(function () {
+                $.ajax({
+                    type: "DELETE",
+                    datatype: "json",
+                    data: {},
+                    url: "../api/Training/" + $(this).attr('trainingId'),
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: 'האימון נמחק בהצלחה!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                            .then(function () {
+                                location.reload();
+                            }
+                        );
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            })
+
+
+
+            initTrainingModal(videoL);
+            getUserTarinings();
+        });
+
+        function postSuccessGetVideos(videos) {
+            videoL = videos
+            str = ""
+
+            str = "<div class='w3-container'>"
+            for (var i = 0; i < videoL.length; i++) {
+
+                videoPath = videoL[i].Subtitlepath
+                videoT = videoL[i].Caption
+                str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                str += "</header >"
+                str += "<div class='w3-container'>"
+                str += "<video class='sizeV' controls='controls'>"
+                str += "<source src='" + videoPath + "' type='video/mp4' />"
+                str += "</video>"
+                str += "</div>"
+                str += "<button class='w3-button w3-block w3-dark-grey'> אהבתי!</button>"
+
+                str += "</div></div>"
+            }
+
+            str += "</div>"
+            $("#ph").html(str);
+            localStorage.setItem('videoList', JSON.stringify(videoL));
+        }
+
+        function postErrorGetVideos() {
+            console.log("postErrorGetVideos")
+        }
+
+        function personalDet() {
+
+            window.location = "customerDeUpdate.html"
+
+        }
+
+        // ליאור למטה
+
+        function getAllVideosUser(videos) {
+            str = "";
+
+            //בניה של הסרטונים בצורה דינאמית - קוד של ליטל אריה
+            for (var i = 0; i < videoL.length; i++) { //סרטונים קיימים בכללי
+                let Vuser = false;//משתנה שבודק האם היוזר דירג את הסרטון בדיפולט לא דירג
+                for (var j = 0; j < videos.length; j++) {//סרטונים שהיוזר דירג
+                    if (videos[j] == videoL[i].VideoId) {
+                        Vuser = true;//אם מצאת את הID של הסרטון ברשימת סרטונים שהוא דירג אז הוא כבר דורג
+                        break;//נעצור
+                    }
+                }
+                videoPath = videoL[i].Subtitlepath
+                videoT = videoL[i].Caption
+                videoId = videoL[i].VideoId
+                str += "<div class='w3-card-4 divCard col-sm-6'><div class='pa'>"
+                str += "<header class='w3-container w3-light-grey'>" + "<h3 id='headerH1'>" + videoT + "</h3>"
+                str += "</header >"
+                str += "<div class='w3-container'>"
+                //if (Vuser == false)
+                str += "<button class='activeRank' id='" + videoL[i].VideoId + "'onclick = 'opinion(this)' >דרג</button >"
+                //else
+                //    str += "<button class='activeRank' id='" + videoL[i].VideoId + "'onclick = 'opinion(this)' disabled>דרג</button >"
+
+                str += "<video class='sizeV' controls onplay='watch(this)' id='" + videoL[i].VideoId + "'>"
+                str += "<source src='" + videoPath + "' type='video/mp4' />"
+                str += "</video>"
+                str += "</div>";
+                var isLiked = _userFavouriteVideos.find(function (video) {
+                    return videoL[i].VideoId == video.VideoId;
+                });
+                if (isLiked) {
+                    str += "<button class='w3-button w3-block w3-dark-grey btnLike' disabled  vidId=" + videoId + ">הוסף למועדפים</button>";
+
+
+                } else {
+                    str += "<button class='w3-button w3-block w3-dark-grey btnLike'  vidId=" + videoId + "> אהבתי!</button>";
+                }
+
+                str += "</div></div>";
+            }
+            $("#ph").html(str);
+        }
+
+        function error(err) {
+            alert("Error: " + err);
+        }
+
+        function opinion(object) {
+            $("img").removeClass("selectedEmoji");
+            $("img").removeClass("selectedLike");
+
+            $("#myModal").show();
+
+            // Get the modal
+            var modal = document.getElementById("myModal");
+
+            // Get the button that opens the modal
+            var btn = document.getElementById("myBtn");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("close")[0];
+
+            //// When the user clicks the button, open the modal
+            //btn.onclick = function () {
+            //    modal.style.display = "block";
+            //}
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            VideoId = object.id;
+
+        }
+
+        function opinion2() {
+            //$("img").removeClass("selectedEmoji");
+            //$("img").removeClass("selectedLike");
+            $("#myModal").hide();
+            $("#myModal2").show();
+
+            // Get the modal
+            var modal = document.getElementById("myModal2");
+
+            // Get the button that opens the modal
+            var btn = document.getElementById("myBtn2");
+
+
+            var span = document.getElementsByClassName("close")[1];
+
+
+            span.onclick = function () {
+                modal.style.display = "none";
+            }
+
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            //VideoId = object.id;
+
+        }
+
+        function InsertRank(idRank) {
+            IdRank = idRank;
+            $("img").removeClass("selectedEmoji");//הסרה של כל הלחוצים
+            $("#" + idRank).addClass("selectedEmoji");//לחיצה על אימוג'י מסויים
+        }
+
+        function InsertRankFinal(idRankLike) {
+            IdRankLike = idRankLike;
+            $("img").removeClass("selectedLike");
+            $("#" + idRankLike).addClass("selectedLike");
+
+            if (IdRankLike == "like") {
+                IdRankLike = "True";
+            }
+            else
+                IdRankLike = "False";
+
+            console.log(IdRankLike)
+            console.log(IdRank)
+            console.log(VideoId)
+
+            customer = localStorage.getItem('customer')
+            customerSelect = JSON.parse(customer);
+            customerId = customerSelect.Id;
+            console.log(customerId)
+
+            n = new Date();
+            y = n.getFullYear();
+            m = n.getMonth() + 1;
+            d = n.getDate();
+            date = m + "-" + d + "-" + y;
+            console.log(date)
+
+            //date = DateTime.FixedLocalNow;
+
+        }
+
+        function postRank() {
+
+            let rank = {
+                UseruserId: customerId,
+                VideoCode: VideoId,
+                RankDate: date,
+                RankValue: IdRank,
+                RankLike: IdRankLike
+            }
+
+            ajaxCall("POST", "../api/Rank", JSON.stringify(rank), postSuccess, postError)
+            return false;
+        }
+
+        function postSuccess(data) {
+
+            resultRank = data;
+            console.log(resultRank);
+
+            $("#myModal2").hide();
+            if (resultRank == 0) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: 'שיחקת אותה! מודים לך על הדירוג!',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            }
+
+            else if (resultRank == 1) {
+                userFN = customerDet.FirstName;
+                $("#myModal").hide();
+
+                Swal.fire({
+                    title: 'היי ' + userFN + ',' + '</br>' + 'נראה שהתוכנית קלה עבורך. האם תרצי לקבל תוכנית בדרגת קושי גבוהה יותר?',
+                    //title: 'היי, נראה שהתוכנית קלה עבורך. האם תרצי לקבל תוכנית בדרגת קושי גבוהה יותר?',
+                    //text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'כן!',
+                    cancelButtonText: 'לא'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        customerId = customerDet.Id;
+                        userAnswer = 1;
+                        changeTP(customerId, userAnswer);
+                    }
+                })
+
+            }
+
+            else if (resultRank == 2) {
+                $("#myModal").hide();
+                userFN = customerDet.FirstName;
+
+                Swal.fire({
+                    title: 'שלום ' + userFN + ',' + '</br>' + 'נראה שתוכנית  האימון מעט קשה עבורך. האם תרצי להחליף?',
+                    //text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'כן!',
+                    cancelButtonText: 'לא'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        //Swal.fire(
+                        //    'Deleted!',
+                        //    'Your file has been deleted.',
+                        //    'success'
+                        //)
+                        customerId = customerDet.Id;
+                        userAnswer = 2;
+                        changeTP(customerId, userAnswer);
+                    }
+                })
+            }
+
+            /* location.reload();*////הפעלה מחדש של העמוד כדי להציג את השינויים בדירוג
+        }
+
+        function changeTP(customerId, userAnswer) {
+            ajaxCall("PUT", "../api/customer?customerId=" + customerId + "&userAnswer=" + userAnswer, "", postSuccessCRTP, postErrorCRTP)
+        }
+
+        function postSuccessCRTP(data) {
+
+            console.log(data);
+            recommendTPNew = data
+            localStorage.setItem('recommendTP', JSON.stringify(recommendTPNew));
+            window.location = "recommendTP.html"
+            //console.log("postSuccessCRTP")
+        }
+
+        function postErrorCRTP() {
+
+            console.log("postErrorCRTP")
+        }
+
+        function postError(err) {
+            console.log(err.responseJSON.Message);
+            alert("קרתה שגיאה בהעלאת הדירוג שלך! אנא נסה מאוחר יותר");
+        }
+
+        var VideoIdOFwatch
+        var userIdOFwatch
+        function watch(watchvideo) {
+            //console.log(watchvideo)
+            userIdOFwatch = customerDet.Id
+            VideoIdOFwatch = watchvideo.id;
+
+            ajaxCall("GET", "../api/History/getHistoryByid/" + userIdOFwatch, "", getSuccesswatch, error);
+
+            //צריך קודם לבדוק שהמספר וידיאו שהנלחץ הוא לא קיים ברשימת ההיסטוריה ואם לא רק אז להוסיף
+
+
+
+        }
+
+        function getSuccesswatch(Videos) {
+            if (Videos.length == 0) {
+                let history = {
+                    CustomerUseruserId: userIdOFwatch,
+                    VideoCode: VideoIdOFwatch
+                }
+                ajaxCall("POST", "../api/History", JSON.stringify(history), postSuccessHistory, postErrorHistory)
+            }
+            else {
+                Videoscopy = Videos.slice();//משכפל את המערך
+                for (var i = 0; i < Videos.length; i++) {
+                    let found = Videoscopy.find(videoId => videoId == parseInt(VideoIdOFwatch))
+                    //מחפשת את הוידיאו במערך של הוידיאו
+                    if (found == undefined) {
+                        let history = {
+                            CustomerUseruserId: userIdOFwatch,
+                            VideoCode: VideoIdOFwatch
+                        }
+                        Videoscopy.push(VideoIdOFwatch)
+                        ajaxCall("POST", "../api/History", JSON.stringify(history), postSuccessHistory, postErrorHistory)
+                    }
+                }
+            }
+
+        }
+
+        function postSuccessHistory(data) {
+            console.log("הסרטון נכנס לרשימת ההיסטוריה")
+        }
+
+        function postErrorHistory(err) {
+            console.log(err.responseJSON.Message);
+            alert("קרתה תקלה אנא נסה שנית!");
+        }
+
+        //lital groiser
+        function initTrainingModal(videos) {
+            $('#datetimepicker').datetimepicker({
+                format: 'd-m-Y H:i',
+                minDate: moment(),
+                onChangeDateTime: function (currentDateTime) {
+                    selectedTrainingDate = currentDateTime;
+                }
+            });
+
+            var videoOptions = '';
+            videos.forEach(function (v) {
+                videoOptions += '<option value="' + v.VideoId + '">' + v.Caption + '</option>'
+            });
+
+            $('#ddlVideos').append(videoOptions);
+
+        }
+
+        function personalDet() {
+            window.location = "customerDeUpdate.html"
+        }
+
+        function getCustomerFromLocalStorage() {
+            var customerData = localStorage.getItem('customer')
+            var customer = JSON.parse(customerData);
+            return customer;
+        }
+
+        function getUserTarinings() {
+            var customer = getCustomerFromLocalStorage();
+
+            $.ajax({
+                type: "GET",
+                datatype: "json",
+                data: {},
+                url: "../api/Video",
+                contentType: "application/json; charset=utf-8",
+                success: function (vidoes) {
+                    allVideos = vidoes;
+
+                    $.ajax({
+                        type: "GET",
+                        datatype: "json",
+                        data: {},
+                        url: "../api/Training/userTrainings/" + customer.Id,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (trainings) {
+                            if (trainings) {
+
+                                //יצירת איוונט
+                                var events = [];
+                                trainings.forEach(function (t) {
+
+                                    //וידיאו func
+                                    var video = getVideoById(t.VideoId);
+                                    var traningTime = moment(t.Date).set({ hour: t.Hour, minute: 0 }).utc().format();//format('DD-MM-YYYY HH:mm');
+                                    events.push({
+                                        title: video.Caption,
+                                        start: traningTime,
+                                        color: getEventColor(t),
+                                        video: video,
+                                        training: t
+                                    });
+                                });
+                                $('#container').fullCalendar('destroy');
+
+                                $('#container').fullCalendar({
+                                    header: {
+                                        left: 'prev,next ',
+                                        center: 'title',
+                                        right: 'month,agendaWeek,agendaDay,listWeek'
+                                    },
+                                    defaultDate: events && events.length > 0 ? events[0].start : moment(),
+                                    navLinks: true, // can click day/week names to navigate views
+                                    editable: false,
+                                    eventLimit: true, // allow "more" link when too many events
+                                    eventClick: function (calEvent, jsEvent, view) {
+                                        // only called if editable is false (?)
+                                        var video = calEvent.video;
+                                        $('#btnTrainingDone').attr('trainingId', calEvent.training.Id);
+                                        $('#btnTrainingDelete').attr('trainingId', calEvent.training.Id);
+                                        $('#trainingVideo').attr('src', video.Subtitlepath);
+                                        $('#videoTitle').html(video.Caption);
+                                        $('#tariningModal').modal('show');
+                                    },
+                                    events: events
+
+                                });
+
+
+                            } else {
+                                Swal.fire({
+                                    position: 'center',
+                                    icon: 'error',
+                                    title: 'קרתה תקלה. נסו שוב!',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                })
+                            }
+
+                        },
+                        error: function (response) {
+                            alert(response);
+                        }
+                    });
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+
+        }
+
+        //וידיאו
+        function getVideoById(id) {
+            var video = allVideos.find(function (v) {
+                return v.VideoId == id;
+            });
+            return video;
+        }
+
+        function getEventColor(training) {
+            var today = new Date();
+            var trainingDate = new Date(training.Date);
+
+            //var daysToTraining = today.diff(trainingDate, 'days');
+
+            if (training.IsCompleted) {
+                return 'green';
+            } else if (!training.IsCompleted && trainingDate > today) {
+                return 'purple';
+            }
+            else {
+                return 'red';
+            }
+        }
+        function getFavouritVideos(userVideos) {
+            var customerData = localStorage.getItem('customer');
+            var customer = JSON.parse(customerData);
+            return jQuery.ajax({
+                type: "POST",
+                data: customer.Id,
+                url: "../api/Video/Favourits/" + customer.Id,
+                contentType: "application/json",
+                success: function (userFavouriteVideos) {
+                    _userFavouriteVideos = userFavouriteVideos;
+                    getAllVideosUser(userVideos);
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+    </script>
+
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a id="active" href="index.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="customerDeUpdate.html"><i class="fa fa-address-card-o" id="personalDet"></i> עדכון פרטים אישיים </a>
+        <a href="recommendTP.html"><i class="fa fa-refresh"></i> התאמת תוכנית אימון </a>
+        <a href="video-favourits.html"><span class="fa fa-heart"></span> סרטונים שאהבתי </a>
+        <a href="questions.html"><span class="fa fa-comments"></span> פורום </a>
+        <a href="history.html"><i class="fa fa-history"></i> היסטוריה </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <hr /><br/>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-7">
+                <div id="ph1"></div>
+                <div id="widthCard">
+                    <div id="ph" class="row"></div>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div id="container"></div>
+                <div>
+                    <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#createTrainingModal">
+                        קבע אימון חדש
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div id="ph1"></div>
+    <div id="ph"></div>-->
+    <!-- The Modal -->
+    <div id="myModal" class="modal rank">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="bold">איך היה  לך האימון? </p>
+            <div class="row">
+
+                <p class="col-sm-4"><img class="img" onclick="InsertRank(this.id)" id="easy" src="Images/easy2.png" /></p>
+                <p class="col-sm-4"><img class="img" onclick="InsertRank(this.id)" id="medium" src="Images/middle2.png" /></p>
+                <p class="col-sm-4"><img class="img" onclick="InsertRank(this.id)" id="hard" src="Images/hard3.png" /></p>
+            </div>
+            <div class="row">
+                <p class="col-sm-4">קל</p>
+                <p class="col-sm-4">בינוני</p>
+                <p class="col-sm-4">קשה</p>
+            </div>
+            <br />
+            <button class="button" id="nextQues">המשך</button>
+        </div>
+    </div>
+    <div id="myModal2" class="modal rank">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="bold">אהבת את הסרטון?</p>
+            <div class="row">
+                <p class="col-sm-6"><img class="img" onclick="InsertRankFinal(this.id)" id="like" src="Images/like2.png" /></p>
+                <p class="col-sm-6"><img class="img" onclick="InsertRankFinal(this.id)" id="notLike" src="Images/dislike2.png" /></p>
+            </div>
+            <button class="button" id="FinalRank">סיימתי!</button>
+        </div>
+    </div>
+        <!--ליטל גרויסר-->
+        <div class="modal fade" id="createTrainingModal" tabindex="-1" style="z-index:9999;" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">קביעת אימון</h5>
+                        <button type="button" style="margin:0" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="">תאריך שעה</label>
+                            <input type="text" class="form-control" id="datetimepicker">
+                        </div>
+                        <div class="form-group">
+                            <label for="">סרטון</label>
+                            <select id="ddlVideos" class="form-control"></select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">סגור</button>
+                        <button type="button" id="btnSaveTraining" class="btn btn-primary">שמור</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="tariningModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><span id="videoTitle"></span> </h5>
+                        <button style="margin:0" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <video class="sizeV" id="trainingVideo" controls="controls">
+                            <source src="" type="video/mp4" />
+                        </video>
+                        <div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary1" id="btnTrainingDone">אימון בוצע</button>
+                        <button class="btn btn-primary" id="btnTrainingDelete">מחק</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+</html>

@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!--<script src="../Scripts/jquery-3.4.1.min.js"></script>-->
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <link href="css/index.css" rel="stylesheet" />
+    <link href="CSS/UsersReport.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            $('#Manger').click(GoBack);
+            //ajaxCall("GET", "../api/customer", "", getSuccess, error);
+            ajaxCall("GET", "../api/customer/GetUserReport", "", getSuccessusers, error);
+
+        });
+
+        function GoBack() {
+            window.location = "ManegerPage.html"
+        }
+
+        var usersArr;
+        function getSuccessusers(users) {
+            usersArr = users;
+            ajaxCall("GET", "../api/customer/GetUsersNotActice", "", getSuccess, error);
+        }
+
+        function getSuccess(notActiveUsers) {
+            console.log(usersArr)
+
+            console.log(notActiveUsers)
+            usersArr = usersArr.filter(user => user.Role != 'M');
+            userR = [];
+            for (var i = 0; i < usersArr.length; i++) {
+                let active = "כן";
+
+                for (var j = 0; j < notActiveUsers.length; j++) {
+                    if (usersArr[i].Id == notActiveUsers[j]) {
+                        active = "לא";
+                    }
+                }
+                let obj = {
+                    Id: usersArr[i].Id, Email: usersArr[i].Email, Password: usersArr[i].Password,
+                    FirstName: usersArr[i].FirstName, SurName: usersArr[i].SurName, LastLogIn: usersArr[i].LastLogIn, Active: active
+                }
+                userR.push(obj);
+            }
+
+            try {
+                tbl = $('#usersTable').DataTable({
+                    data: userR,
+                    pageLength: 10,
+                    columns: [
+                        {
+
+                            render: function (data, type, row, meta) {
+                                let dataUsers = "data-cattId='" + row.Id + "'";
+                                //editBtn = "<button type='button' class = 'editBtn btn btn-success' " + categories + "> ערוך </button>";
+                                //deleteBtn = "<button type='button' class = 'deleteBtn btn btn-danger' " + categories + "> מחק </button>";
+                                editBtn = " ";
+                                deleteBtn = " ";
+                                return editBtn + deleteBtn;
+                            }
+                        },
+
+                        { data: "Id" },
+                        { data: "Email" },
+                        { data: "Password" },
+                        { data: "FirstName" },
+                        { data: "SurName" },
+                        { data: "LastLogIn" },
+                        { data: "Active" }
+                    ],
+
+                });
+
+            }
+
+            catch (err) {
+                alert(err);
+            }
+        }
+        
+        
+
+        function error(err) {
+            swal("Error: " + err);
+        }
+    </script>
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="ManegerPage.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="NewUser.html"><i class="fa fa-address-card" id="personalDet"></i> יצירת משתמש חדש </a>
+        <a href="index_Content_Upload.html"><i class="fa fa-refresh"></i> תכנים  </a>
+        <a id="active" href="UsersReport.html"><span class="fa fa-users"></span> דוח משתמשים </a>
+        <a href="videosReport.html"><i class="fa fa-eye"></i> דוח צפיות </a>
+        <a href="Categories.html"><span class="fa fa-indent"></span> קטגוריות </a>
+        <a href="QuestionsManger.html"><i class="fa fa-comments"></i> פורום </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <hr /><br />
+    <div class="container" id="formCamp">
+        <form id="Mform">
+            <table id="usersTable" class="display nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>מספר מנוי</th>
+                        <th>מייל</th>
+                        <th>סיסמא</th>
+                        <th>שם פרטי</th>
+                        <th>שם משפחה</th>
+                        <th>תאריך כניסה אחרון</th>
+                        <th>האם פעיל?</th>
+                    </tr>
+                </thead>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

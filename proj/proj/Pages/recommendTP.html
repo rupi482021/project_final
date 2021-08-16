@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link href="css/recommendTP.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title></title>
+
+    <script>
+
+        $(document).ready(function () {
+
+            customerDeta = localStorage.getItem('customer')
+            customerD = JSON.parse(customerDeta);
+            recommendTP = localStorage.getItem('recommendTP')
+            cusRecommendTP = JSON.parse(recommendTP);
+            trainingProgramC = localStorage.getItem('trainingProgramC')
+            trainingProgramC = JSON.parse(trainingProgramC);
+
+            str = "";
+            str1 = "";
+
+            cusName = customerD.FirstName
+            str1 = "<div class='nameRTP'> היי " +"<b>"+ cusName +"</b>"+","+ " אלו התוכניות המומלצות עבורך! איזו תרצי לקבל? " + "</div>"
+            $("#ph1").html(str1);
+
+            str = "<div class='container'>"
+            if (cusRecommendTP != null) {
+                for (var i = 0; i < cusRecommendTP.length; i++) {
+
+                    tcode = cusRecommendTP[i].Tcode;
+                    title = cusRecommendTP[i].Tname;
+                    Instuction = cusRecommendTP[i].Instuction;
+                    LevelType = cusRecommendTP[i].LevelType;
+
+                    if (LevelType == 'A')
+                        LevelType = "&#10061 רמת קושי: קלה "
+
+                    if (LevelType == 'B')
+                        LevelType = "&#10061 רמת קושי: בינונית "
+
+
+                    if (LevelType == 'C')
+                        LevelType = " &#10061 רמת קושי: קשה   "
+
+                    IsForImproveSport = cusRecommendTP[i].IsForImproveSport;
+
+                    if (IsForImproveSport == true)
+                        IsForImproveSport = ' &#10004 מתאים לשיפור הישגי ספורט'
+                    if (IsForImproveSport == false)
+                        IsForImproveSport = ' &#10006 לא מתאים לשיפור הישגי ספורט '
+
+                    IsForRehabilitation = cusRecommendTP[i].IsForRehabilitation;
+
+                    if (IsForRehabilitation == true)
+                        IsForRehabilitation = ' &#10004 מתאים לשיקום הגוף '
+                    if (IsForRehabilitation == false)
+                        IsForRehabilitation = '&#10006 לא מתאים לשיקום '
+
+                    IsForStrengthening = cusRecommendTP[i].IsForStrengthening;
+
+                    if (IsForStrengthening == true)
+                        IsForStrengthening = '&#10004 מתאים לחיטוב וחיזוק הגוף '
+                    if (IsForStrengthening == false)
+                        IsForStrengthening = '&#10006 לא מתאים לחיטוב וחיזוק הגוף'
+
+                    pic = cusRecommendTP[i].Pic
+                    str += "<div class='flip-card'>"
+                    str += "<div class='flip-card-inner'>"
+                    str += "<div class='flip-card-front'>"
+                    str += "<img class='img' src='" + pic + "'/>"
+                    str += "<h5 id='fronth5'> " + title + " &#10097<h5/>"
+                    str += "<div class='phTPC' id='" + tcode + "' ></div>"
+                    str += "</div>"
+                    str += "<div class='flip-card-back'>"
+                    str += "<u><h5 id='h5'>" + title + ":<h5/></u></br>"
+                    str += "<p>" + Instuction + "<p/>"
+                    str += "<p>" + LevelType + "<p/>"
+                    str += "<p>" + IsForImproveSport + "<p/>"
+                    str += "<p>" + IsForRehabilitation + "<p/>"
+                    str += "<p>" + IsForStrengthening + "<p/></br>"
+                    str += "<button class='buttonRTP' id='" + tcode + "'onclick='myRTP(this)'>זו אני רוצה!</button></div>"
+                    str += "</div>"
+                    str += "</div>" 
+
+                }
+            }
+
+            else
+            {
+                userId = customerD.Id
+                ajaxCall("GET", "../api/customer?id=" + userId, " ", postSuccessRecoTP, postErrorRecoTP)
+            }
+
+            str += "</div>"
+            $("#ph").html(str);
+
+            for (var i = 0; i < cusRecommendTP.length; i++) {
+                if (cusRecommendTP[i].Tcode == trainingProgramC.Tcode) {
+
+                    //strTPC = "תוכנית שנבחרה"
+                    //$(".phTPC").html(strTPC);
+
+                    //if (trainingProgramC.Tcode == this.id) {
+                    $(".phTPC").html(strTPC);
+                    //}
+
+                }
+            }
+
+        });
+
+        function postSuccessRecoTP(recommendedTrainingProgram)
+        {
+            console.log("postSuccessRecoTP")
+            cusRecommendTP = recommendedTrainingProgram
+            //console.log(a)
+            localStorage.setItem('recommendTP', JSON.stringify(cusRecommendTP));
+
+            str = "<div class='container'>"
+            for (var i = 0; i < cusRecommendTP.length; i++) {
+
+                tcode = cusRecommendTP[i].Tcode;
+                title = cusRecommendTP[i].Tname;
+                Instuction = cusRecommendTP[i].Instuction;
+                LevelType = cusRecommendTP[i].LevelType;
+
+                if (LevelType == 'A')
+                    LevelType = "&#10061 רמת קושי: קלה "
+
+                if (LevelType == 'B')
+                    LevelType = "&#10061 רמת קושי: בינונית "
+
+
+                if (LevelType == 'C')
+                    LevelType = " &#10061 רמת קושי: קשה   "
+
+                IsForImproveSport = cusRecommendTP[i].IsForImproveSport;
+
+                if (IsForImproveSport == true)
+                    IsForImproveSport = ' &#10004 מתאים לשיפור הישגי ספורט'
+                if (IsForImproveSport == false)
+                    IsForImproveSport = ' &#10006 לא מתאים לשיפור הישגי ספורט '
+
+                IsForRehabilitation = cusRecommendTP[i].IsForRehabilitation;
+
+                if (IsForRehabilitation == true)
+                    IsForRehabilitation = ' &#10004 מתאים לשיקום הגוף '
+                if (IsForRehabilitation == false)
+                    IsForRehabilitation = '&#10006 לא מתאים לשיקום '
+
+                IsForStrengthening = cusRecommendTP[i].IsForStrengthening;
+
+                if (IsForStrengthening == true)
+                    IsForStrengthening = '&#10004 מתאים לחיטוב וחיזוק הגוף '
+                if (IsForStrengthening == false)
+                    IsForStrengthening = '&#10006 לא מתאים לחיטוב וחיזוק הגוף'
+
+                pic = cusRecommendTP[i].Pic
+                str += "<div class='flip-card'>"
+                str += "<div class='flip-card-inner'>"
+                str += "<div class='flip-card-front'>"
+                str += "<img class='img' src='" + pic + "'/>"
+                str += "<h5 id='fronth5'> " + title + " &#10097<h5/>"
+                str += "</div>"
+                str += "<div class='flip-card-back'>"
+                str += "<u><h5 id='h5'>" + title + ":<h5/></u></br>"
+                str += "<p>" + Instuction + "<p/>"
+                str += "<p>" + LevelType + "<p/>"
+                str += "<p>" + IsForImproveSport + "<p/>"
+                str += "<p>" + IsForRehabilitation + "<p/>"
+                str += "<p>" + IsForStrengthening + "<p/></br>"
+                str += "<button class='buttonRTP' id='" + tcode + "'onclick='myRTP(this)'>זו אני רוצה!</button></div>"
+                str += "</div>"
+                str += "</div>"
+
+            }
+            str += "</div>"
+            $("#ph").html(str);
+        }
+
+        function postErrorRecoTP() {
+            console.log("postErrorRecoTP")
+        }
+
+        function myRTP(a) {
+
+            tcode = a.id;
+            for (var i = 0; i < cusRecommendTP.length; i++) {
+
+                if (cusRecommendTP[i].Tcode == tcode)
+                {
+                    //tCode = cusRecommendTP[i].Tcode;
+                    tPC = {
+
+                        CustomerId: customerD.Id,
+                        Tcode: cusRecommendTP[i].Tcode,
+                        Tname: cusRecommendTP[i].Tname,
+                        Instuction: cusRecommendTP[i].Instuction,
+                        LevelType: cusRecommendTP[i].LevelType,
+                        Pic: cusRecommendTP[i].Pic,
+                        IsForStrengthening: cusRecommendTP[i].IsForStrengthening,
+                        IsForRehabilitation: cusRecommendTP[i].IsForRehabilitation,
+                        IsForImproveSport: cusRecommendTP[i].IsForImproveSport,
+                        
+                    }
+                }
+            }
+
+            trainingProgramC = tPC
+            localStorage.setItem('trainingProgramC', JSON.stringify(trainingProgramC))
+            //console.log(cTP)
+            //console.log(cusId)
+            ajaxCall("POST", "../api/customer/cTP", JSON.stringify(tPC), postSuccessCRTP, postErrorCRTP)
+        }
+
+        function postSuccessCRTP(videoData) {
+            videoD = videoData
+            videoL =videoD.VideoList
+            console.log(videoL)
+            console.log("postSuccessCRTP")
+            localStorage.setItem('videoList', JSON.stringify(videoL));
+            window.location = "index.html"
+        }
+
+        function postErrorCRTP(err) {
+            console.log(err.responseJSON.ExceptionMessage)
+            console.log("postErrorCRTP")
+        }
+
+    </script>
+
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="index.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a href="customerDeUpdate.html"><i class="fa fa-address-card-o"></i> עדכון פרטים אישיים </a>
+        <a id="active" href="recommendTP.html"><i class="fa fa-refresh"></i> התאמת תוכנית אימון </a>
+        <a href="video-favourits.html"><span class="fa fa-heart"></span> סרטונים שאהבתי </a>
+        <a href="questions.html"><span class="fa fa-comments"></span> פורום </a>
+        <a href="history.html"><i class="fa fa-history"></i> היסטוריה </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+
+    <hr />
+    <div id="ph1"></div>
+    <div id="ph"></div>
+
+</body>
+</html>

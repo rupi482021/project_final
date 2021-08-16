@@ -1,0 +1,401 @@
+﻿    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!--<script src="../Scripts/jquery-3.4.1.min.js"></script>-->
+        <script src="../Scripts/jquery-1.10.2.min.js"></script>
+        <script src="../Scripts/ajaxCalls.js"></script>
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <script src="../Scripts/bootstrap.min.js"></script>
+        <script src="../Scripts/bootstrap.js"></script>
+
+        <!--<link href="css/index.css" rel="stylesheet" />-->
+        <link href="css/manegercss.css" rel="stylesheet" />
+
+        <script>
+            $(document).ready(function () {
+
+                $("#newCategory").click(addCategory);
+                $('#newContent').click(addContent);
+                $('#NewProfile').click(addProfile);
+                $('#UserReport').click(ShowUsers);
+                $("#saveBTN").click(postProfile);
+
+                customerDet = localStorage.getItem('customer')
+                customerDet = JSON.parse(customerDet);
+
+                cusFName = customerDet.FirstName
+                cusLName = customerDet.SurName
+
+                str1 = "שלום " + cusFName + "," + "<br/>" + " התעדכן בנתונים להיום:";
+                $("#MangerName").html(str1);
+
+                ajaxCall("GET", "../api/Content", "", getSuccessContent, error);//כמות סרטונים לפי קטגוריה
+                ajaxCall("GET", "../api/customer/GetUserReport", "", getSuccessusers, error);//כמות פעילים
+                ajaxCall("GET", "../api/ManagerReport", "", sucManagerReport, errManagerReport)
+
+
+                //שאלות שלא נענו למנהל
+                ajaxCall("GET", "../api/Question", "", checkNumOfQ, error);//הדשבורד הצגת כמות שאלות שלא נענו
+                //$('#Qus').on('click', showQ);//לחיצה על אייקון שאלה מעביר לדף שאלות למנהל
+
+
+
+            });
+
+            function getSuccessContent(contents) {
+                var beginning = 0;
+                var end = 20;
+
+                var shekum = 0;
+                var bodyShape = 0;
+                var competition = 0;
+                for (var i = 0; i < contents.length; i++) {
+                    if (contents[i].CategoryCode == '1')
+                        shekum++;
+                    else if (contents[i].CategoryCode == '2')
+                        bodyShape++
+                    else
+                        competition++
+                }
+                console.log(shekum + " " + bodyShape + "  " + competition + " " + beginning + " " + end)
+
+                var xValues = ["שיקום", "ספורט הישגי", "חיטוב"];
+                var yValues = [shekum, bodyShape, competition];
+                var barColors = ["black", "#e21e25", "#444"];
+
+                new Chart("myChart", {
+                    type: "bar",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            backgroundColor: barColors,
+                            data: yValues
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: "כמות סרטונים לפי קטגוריה"
+
+                        },
+                        legend: { display: false },
+                        responsive: true,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    steps: 5,
+                                    stepValue: 5,
+                                    max: 20 //max value for the chart is 60
+                                }
+                            }]
+                        },
+                        label: {
+                            font: {
+                                family: "Tahoma"
+                            }
+                        }
+                    }
+                });
+            }
+
+            function checkNumOfQ(questions) {//הדשבורד הצגת כמות שאלות שלא נענו
+                notAnswered = questions.filter(q => q.Status == false);
+
+                if (notAnswered.length > 0) {
+                    str1 = " +" + notAnswered.length;
+                    $("#btnWaitingQuestions").html(str1);
+                }
+            }
+
+
+            var usersArr;
+            function getSuccessusers(users) {
+                usersArr = users;
+                ajaxCall("GET", "../api/customer/GetUsersNotActice", "", getSuccessActive, error);
+            }
+
+            function getSuccessActive(notActiveUsers) {
+                usersArr = usersArr.filter(user => user.Role != 'M');
+                userR = [];
+                for (var i = 0; i < usersArr.length; i++) {
+                    let active = "כן";
+
+                    for (var j = 0; j < notActiveUsers.length; j++) {
+                        if (usersArr[i].Id == notActiveUsers[j]) {
+                            active = "לא";
+                        }
+                    }
+                    let obj = {
+                        Id: usersArr[i].Id, Email: usersArr[i].Email, Password: usersArr[i].Password,
+                        FirstName: usersArr[i].FirstName, SurName: usersArr[i].SurName, Active: active
+                    }
+                    userR.push(obj);
+                }
+
+                console.log(userR)
+
+                var activeYes = 0;
+                var activeNo = 0;
+                for (var i = 0; i < userR.length; i++) {
+                    if (userR[i].Active == "כן")
+                        activeYes++;
+                    if (userR[i].Active == "לא")
+                        activeNo++;
+                }
+
+                var xValues = ["לא פעילים", "פעילים"];
+                var yValues = [activeNo, activeYes];
+                var barColors = [
+                    "#e21e25",
+                    "#1e7145"
+                ];
+
+                new Chart("myChart2", {
+                    type: "pie",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            backgroundColor: barColors,
+                            data: yValues
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: "כמות משתמשים פעילים במערכת"
+                        },
+                        label: {
+                            font: {
+                                family: "Tahoma"
+                            }
+                        }
+                    }
+                });
+            }
+            function error(err) {
+                swal("Error: " + err);
+            }
+
+            function showQ() {
+                window.location = "QuestionsManger.html"
+            }
+
+            function ShowUsers() {
+                window.location = "UsersReport.html"
+            }
+
+            function addCategory() {
+                window.location = "Categories.html"
+            }
+
+            function addContent() {
+                window.location = "index_Content_Upload.html"
+            }
+
+            function addProfile() {
+                result = rand(8);
+                //console.log(result);
+                $("#Password").val(result);
+                $('#Password').attr('disabled', true);
+                window.location = "#popup1";
+            }
+
+            function rand(length) {
+                var result = '';
+                var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                var charactersLength = characters.length;
+                for (var i = 0; i < length; i++) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                }
+                return result;
+            }
+
+
+            function postProfile() {
+                email = $("#Mail").val();
+                Pass = $("#Password").val();
+
+                let profile = {
+                    Mail: email,
+                    Password: Pass
+                }
+
+                ajaxCall("POST", "../api/Profile", JSON.stringify(profile), postSuccess, postError)
+                return false;
+            }
+
+
+            function postSuccess(data) {
+                alert("המשתמש : " + data + " הוקם בהצלחה!")
+            }
+
+            function postError(err) {
+                console.log(err.responseJSON.Message);
+                alert("קרתה שגיאה בהעלאת משתמש חדש");
+            }
+
+            function sucManagerReport(videosRep) {
+
+                videosRepList = videosRep;
+                console.log(videosRepList);
+                var num1 = ' ';
+                var num2 = ' ';
+                var num3 = ' ';
+                var num4 = ' ';
+
+                var per1 = 0;
+                var per2 = 0;
+                var per3 = 0;
+                var per4 = 0;
+
+                for (var i = 0; i < videosRepList.length; i++) {
+                    var name = videosRepList[i].Caption;
+                    var percentage = videosRepList[i].PrecOfLikes;
+
+                    if (num1 == ' ') {
+                        if (percentage > 80) {
+                            var num1 = name;
+                            var per1 = percentage;
+                        }
+                    }
+
+
+                    else if (num2 == ' ') {
+                        if (percentage > 80) {
+                            var num2 = name;
+                            var per2 = percentage;
+                        }
+                    }
+
+                    else if (num3 == ' ') {
+                        if (percentage > 80) {
+                            var num3 = name;
+                            var per3 = percentage;
+                        }
+                    }
+
+                    else if (num4 == ' ') {
+                        if (percentage > 80) {
+                            var num4 = name;
+                            var per4 = percentage;
+                        }
+                    }
+                }
+
+
+                CanvasJS.addColorSet("colorSet",
+                        [//colorSet Array
+                            "#e21e25",
+                            "#444",
+                            "#969090",
+                            "#333"
+                        ]);
+
+                var chart = new CanvasJS.Chart("chartContainer", {
+                    colorSet: "colorSet",
+                    animationEnabled: true,
+                    theme: "light2", //"light1", "dark1", "dark2"
+                    title: {
+                        text: "הסרטונים הנצפים ביותר"
+                    },
+                    data: [{
+                        type: "funnel",
+                        indexLabelPlacement: "inside",
+                        indexLabelFontColor: "white",
+                        toolTipContent: "<b>{label}</b>: <b>({y}{percentage}%)</b>",
+                        //indexLabel: "{label} ({percentage}%)",
+                        dataPoints: [
+                            { y: per1, label: num1 },
+                            { y: per2, label: num2 },
+                            { y: per3, label: num3 },
+                            { y: per4, label: num4 }
+                        ]
+                    }]
+                });
+
+                chart.render();
+
+            }
+
+
+            function errManagerReport() {
+                console.log("errManagerReport")
+            }
+
+        </script>
+    </head>
+    <body>
+        <div class="icon-bar">
+            <img class="logoF" src="Images/KaautsuIsrael.png" />
+            <a id="active" href="ManegerPage.html"><span class="fa fa-home"></span> עמוד הבית </a>
+            <a href="NewUser.html"><i class="fa fa-address-card" id="personalDet"></i> יצירת משתמש חדש </a>
+            <a href="index_Content_Upload.html"><i class="fa fa-refresh"></i> תכנים  </a>
+            <a href="UsersReport.html"><span class="fa fa-users"></span> דוח משתמשים </a>
+            <a href="videosReport.html"><i class="fa fa-eye"></i> דוח צפיות </a>
+            <a href="Categories.html"><span class="fa fa-indent"></span> קטגוריות </a>
+            <a href="QuestionsManger.html"><i class="fa fa-comments"></i> פורום </a>
+            <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+        </div>
+        <hr />
+        <div id="MangerName"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+
+                    <div class="row">
+                        <div class="col">
+                            <canvas id="myChart2"></canvas>
+                        </div>
+
+                        <hr id="Horizontal" />
+
+                        <div class="col">
+                            <div id="chartContainer"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="vertical"></div>
+
+                <div class="col-sm-6">
+                    <div class="row">
+                        <div class="col card">
+                            <a href="QuestionsManger.html"><i id="Qus" class="fa fa-question-circle"></i></a>
+                            <h3 id="btnWaitingQuestions"></h3>
+                            <p>שאלות שלא נענו</p>
+                        </div>
+
+                        <hr id="Horizontal"/>
+
+                        <div class="col">
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+    </html>

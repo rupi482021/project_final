@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="css/logIn.css" rel="stylesheet" />
+<script src="../../Scripts/jquery-1.10.2.min.js"></script>
+<script src="../Scripts/ajaxCallsWithKey.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script>
+
+        $(document).ready(function () {
+            $("#CHECK").click(CHECK);
+        });
+
+    function CHECK() {
+
+        a = "CHECK"
+        ajaxCall("post", "../api/DBService?check=" + a , " ", postSuccessUserLogIn, postErrorUserLogIn)
+    }
+
+    function postSuccessUserLogIn() {
+
+        console.log("sussessCHECK")
+    }
+
+
+    function postErrorUserLogIn() {
+
+        console.log("erroeCHECK")
+    }
+    </script>
+</head>
+<body>
+<button id="CHECK">CHECK</button>
+</body>
+</html>

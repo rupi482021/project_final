@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link href="css/customerFormUpdate.css" rel="stylesheet" />
+    <script src="../Scripts/moment.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            customerDeta = localStorage.getItem('customer')
+            customer = JSON.parse(customerDeta);
+            console.log(customer)
+
+            document.getElementById("fName").value = customer.FirstName
+            document.getElementById("lName").value = customer.SurName
+            document.getElementById("email").value = customer.Email
+            document.getElementById("weight").value = customer.Weight
+            document.getElementById("height").value = customer.Height
+            document.getElementById("password").value = customer.Password
+            document.getElementById("gender").value = customer.Gender
+
+            var convertDate = moment(customer.Birthdate).format('YYYY-MM-DD');
+            document.getElementById("birthday").value = convertDate
+            document.getElementById("categoryType").value = customer.CategoryType
+
+
+            $('#categoryType').change(function () {
+                $('.continue').hide();
+                $('#' + $(this).val()).show();
+            });
+
+            $("#pForm").submit(f1);
+
+        });
+
+        function f1() {
+            updateCustomer();
+            return false;
+        }
+
+        function updateCustomer(updateCustomer) {
+
+            firstN = $("#fName").val();
+            lname = $("#lName").val();
+            email = $("#email").val();
+            gender = $("#gender").val();
+            password = $("#password").val();
+            birthday = $("#birthday").val();
+            weight = $("#weight").val();
+            height = $("#height").val();
+            categoryType = $("#categoryType").val();
+            activeLastYear = $("input[name='one']:checked").val();
+            trainKaatsu = $("input[name='one2']:checked").val();
+            check = $("input[name='one3']:checked").val();
+            sportType = $("#categorySport").val();
+            if (sportType == null)
+                sportType = "NULL"
+
+            if (check == "sportInj") {
+                sportInj = true;
+                accident = ""
+                metadises = ""
+            }
+            else if (check == "accident") {
+                accident = true;
+                sportInj = ""
+                metadises = ""
+            }
+            else {
+                metadises = true;
+                sportInj = ""
+                accident = ""
+            }
+
+            customer = {
+
+                Id: customer.Id,
+                Email: email,
+                Password: password,
+                FirstName: firstN,
+                SurName: lname,
+                Gender: gender,
+                Birthdate: birthday,
+                CategoryType: categoryType,
+                Weight: weight,
+                Height: height,
+                SportType: sportType,
+                ActiveLastYear: activeLastYear,
+                TrainKaatsu: trainKaatsu,
+                SportInj: sportInj,
+                Accident: accident,
+                Metadises: metadises
+
+            }
+
+            console.log(customer)
+            ajaxCall("PUT", "../api/customer", JSON.stringify(customer), postSuccessUpCustomer, postErrorUpCustomer)
+
+            updateCust = customer
+            localStorage.setItem('customer', JSON.stringify(updateCust))
+
+        }
+
+        function postSuccessUpCustomer(data) {
+
+            TPN = data;
+            console.log(TPN)
+            localStorage.setItem('recommendTP', JSON.stringify(TPN))
+
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: ' פרטייך עודכנו בהצלחה 😊',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(function () {
+                window.location = "recommendTP.html"
+                });
+
+
+        }
+
+        function postErrorUpCustomer(err) {
+            if (err.status == "404")
+                console.log(err.responseJSON.ExceptionMessage)
+
+            else if (err.status == "403")
+                console.log(err.responseJSON.ExceptionMessage)
+
+
+            else if (err.status == "500")
+                console.log(err.responseJSON.ExceptionMessage)
+
+            $("#ph").html("יש בעיה. אנסה נסה שנית 😕")
+
+        }
+
+    </script>
+</head>
+<body>
+    <div class="icon-bar">
+        <img class="logoF" src="Images/KaautsuIsrael.png" />
+        <a href="index.html"><span class="fa fa-home"></span> עמוד הבית </a>
+        <a id="active" href="#"><i class="fa fa-address-card-o" id="personalDet"></i> עדכון פרטים אישיים </a>
+        <a href="recommendTP.html"><i class="fa fa-refresh"></i> התאמת תוכנית אימון </a>
+        <a href="video-favourits.html"><span class="fa fa-heart"></span> סרטונים שאהבתי </a>
+        <a href="questions.html"><span class="fa fa-comments"></span> פורום </a>
+        <a href="history.html"><i class="fa fa-history"></i> היסטוריה </a>
+        <a href="logIn.html" class="active"><i class="fa fa-user"></i> התנתקות </a>
+    </div>
+    <hr />
+    <!--<img class="logoF" src="Images/KaautsuIsrael.png" />-->
+    <div class="container">
+        <form id="pForm" class="text-right">
+            <h2 class="CF">פרטים אישיים</h2><br />
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <label for="modelTB" class="label"><span class="red-star">* </span> שם פרטי </label>
+                    <input type="text" class="form-control input" id="fName" placeholder="הכנס שם פרטי" required
+                           pattern="[א-ת]{1,10}"
+                           oninvalid="this.setCustomValidity('You can enter up to 10 characters only in English')"
+                           oninput="this.setCustomValidity('')" />
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="manufacturerTB" class="label"><span class="red-star">* </span>שם משפחה</label>
+                    <input type="text" class="form-control input" id="lName" placeholder="הכנס שם משפחה" required
+                           pattern="[א-ת]{1,20}"
+                           oninvalid="this.setCustomValidity('You can enter up to 20 characters only in English')"
+                           oninput="this.setCustomValidity('')" />
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="priceTB" class="label"><span class="red-star">* </span>אימייל</label>
+                    <input type="text" class="form-control input" id="email" placeholder="הכנס אימייל" required
+                           pattern="^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$"
+                           oninvalid="this.setCustomValidity('Format should be __@__.__')"
+                           oninput="this.setCustomValidity('')" />
+                </div>
+
+                <div class="form-group col-sm-6">
+                    <label for="discountCodeTB" class="label"> <span class="red-star">* </span>סיסמה</label>
+                    <input type="password" class="form-control input" id="password" placeholder="הכנס סיסמה" required
+                           pattern="^(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$"
+                           oninvalid="this.setCustomValidity('The password must contain at least 8 characters, at least one uppercase letter and at least one digit')"
+                           oninput="this.setCustomValidity('')" />
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="birthdate" class="label"> <span class="red-star" required>* </span>תאריך לידה</label><br />
+                    <input type="date" id="birthday" name="birthday">
+                </div>
+
+                <div class="form-group col-sm-6">
+                    <label for="discountCodeTB" class="label"> <span class="red-star">* </span>מגדר</label><br />
+                    <select id="gender" name="gender" required>
+                        <option>בחר</option>
+                        <option value="male" id="male">זכר</option>
+                        <option value="female" id="female">נקבה</option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="modelTB" class="label">משקל</label>
+                    <input type="text" class="form-control input" id="weight" placeholder="הכנס משקל" />
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="modelTB" class="label">גובה</label>
+                    <input type="text" class="form-control input" id="height" placeholder="הכנס גובה" />
+                </div>
+                <div class="form-group col-6">
+                    <label for="discountCodeTB" class="label"> <span class="red-star">* </span>בחר את הקטגוריה המתאימה עבורך</label>
+                    <select id="categoryType" name="gender" required>
+                        <option value="NULL">בחר קטגוריה</option>
+                        <option value="2">חיטוב וחיזוק הגוף</option>
+                        <option value="1">שיקום יכולות שנפגעו</option>
+                        <option value="3">שיפור הישגי ספורט</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row form-group col-sm-12">
+                <div class="continue" style="display:none" id="2">
+                    <div id="activeLastYear">
+                        <label for="gender" class="label">האם ביצעת פעילות גופנית מסוימת בשנה האחרונה ובצורה קבועה? <span class="red-star">* </span></label><br />
+                        <input type="radio" name="one" value="true">
+                        <label for="yes" value="true">כן</label><br>
+                        <input type="radio" name="one" value="false">
+                        <label for="no" value="false">לא</label>
+                    </div>
+
+                    <div id="trainKaatsu">
+                        <label for="gender" class="label">האם ביצעת פעם אימונים באמצעות קאטסו?  האם יש לך ניסיון? <span class="red-star">* </span></label><br />
+                        <input type="radio" name="one2" value="true">
+                        <label for="yes" value="true">כן</label><br>
+                        <input type="radio" name="one2" value="false">
+                        <label for="no" value="false">לא</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-group col-sm-12">
+                <div class="continue" style="display:none" id="1">
+                    <label class="label">יכולות שנפגעו כתוצאה מ: <span class="red-star">* </span></label><br />
+                    <input type="radio" name="one3" value="sportInj">
+                    <label for="sport" value="sportInj">פציעת ספורט</label><br />
+                    <input type="radio" name="one3" value="accident">
+                    <label for="Rehabilitation" value=" accident">שיקום מתאונה/ניתוח</label><br />
+                    <input type="radio" name="one3" value="metadises">
+                    <label for="disease" value="metadises">שיקום בעקבות מחלה מטאבולית</label>
+                </div>
+            </div>
+            <div class="row form-group col-sm-12">
+                <div class="continue" style="display:none" id="3">
+                    <label for="discountCodeTB" class="label">בחר תחום ספורט בו הינך עוסק <span class="red-star">* </span></label><br />
+                    <select id="categorySport" name="gender" required>
+                        <option value="select">בחר קטגוריה</option>
+                        <option value="basketball">כדורסל</option>
+                        <option value="football">כדורגל</option>
+                        <option value="Boating ">שייט</option>
+                        <option value="tennis">טניס </option>
+                        <option value="Weights">הרמת משקולות</option>
+                        <option value="surfing">גלישה</option>
+                        <option value="Triathlon">טריאתלון</option>
+                        <option value="Mountaineering">טיפוס </option>
+                    </select>
+                </div>
+            </div>
+            <input type="submit" class="button" value="עדכן פרטים!" />
+        </form>
+    </div>
+</body>
+</html>
