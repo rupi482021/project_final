@@ -1,0 +1,110 @@
+﻿canvas#myChart {
+    width: 100%;
+    max-width: 500px;
+    font-family: Tahoma;
+    height: 90%;
+}
+
+canvas#myChart2 {
+    width: 80%;
+    max-width: 220px;
+    font-family:Tahoma;
+
+}
+
+#chartContainer {
+    height: 190px;
+    width: 70%;
+}
+canvas {
+    margin: 0 auto;
+    font-family: Tahoma;
+}
+
+
+/* Style the counter cards */
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    text-align: center;
+    background-color: #969090;
+    color: white;
+    width: 27%;
+    margin: 0 auto;
+    font-family:Tahoma;
+}
+
+#Qus {
+    font-size: 50px;
+}
+
+.icon-bar {
+    /*width: 100%;*/
+    /*background-color: #555;*/
+    overflow: auto;
+    direction: rtl;
+    text-align: right;
+    padding-right: 20px;
+    margin-top: 2%;
+/**/    font-family: Tahoma, Arial, sans-serif;
+}
+
+    .icon-bar a {
+        /*        float: right;
+*/ width: 17%;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+        color: black;
+        font-size: 15px;
+        margin-left: 2%;/* ליאור הוסיפה*/
+    }
+
+        .icon-bar a:hover {
+            color: #000;
+        }
+
+.logoF {
+    /*margin-top: 2%;*/
+    /*margin-left:87%;*/
+    width: 110px;
+    height: 80px;
+    direction: rtl;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+#active {
+    color: #e21e25;
+}
+
+#MangerName {
+    direction: rtl;
+    margin-right: 10%;
+    font-family:Tahoma;
+
+}
+
+
+#Qus:hover {
+    color: #e21e25;
+}
+.vertical {
+    border-left: 2px solid black;
+    height: 70%;
+    position: absolute;
+    left: 50%;
+}
+
+#Horizontal {
+    border: 1px solid black;
+    width: 100%;
+    color: black;
+}
+
+a.canvasjs-chart-credit {
+    display: none;
+}
+
+*, *:before, *:after {
+    /* box-sizing: inherit; */
+    margin: 0 auto;
+}

@@ -1,0 +1,205 @@
+﻿body {
+    font-family: Tahoma, Arial, sans-serif;
+    direction:rtl;
+    text-align:right;
+}
+
+.flip-card {
+    background-color: #212529;
+    width: 300px;
+    height: 400px;
+    perspective: 1000px;
+    color:white;
+    margin-left: 25px;
+}
+
+/*.TPC {
+
+
+}*/
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.flip-card-front {
+    background-color: #bbb;
+    color: black;
+}
+
+.flip-card-back {
+    background-color: #656161;
+    opacity: 0.9;
+    color: white;
+    transform: rotateY(180deg);
+    padding-top: 5%;
+    padding-bottom: 5%;
+    opacity: 0.8;
+}
+
+.img {
+    width: 300px;
+    height: 300px
+}
+
+.row {
+
+    margin-top: 10%;
+    /*padding-right: 5%;
+    margin-left: 25%;*/
+
+}
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin-top: 1%;
+    /*margin-left: 45%;*/
+    min-height: 0vh;
+}
+
+#h5 {
+    color: white;
+    font-weight: bolder;
+    font-size: 1.15rem;
+}
+
+.h5, h5 {
+    font-size: 1.15rem;
+}
+#fronth5 {
+    padding-top: 9%;
+    color: #212529;
+    font-weight: bold;
+}
+
+
+button {
+    background-color: #212529;
+    color: white;
+    padding: 11px 11px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 25%;
+    border-radius: 8px;
+    /*margin-left: 36%;*/
+    font-size: 23px;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+    button:hover,
+    button:focus {
+        color: white;
+        background-color: #c22d1d;
+        border-bottom-color: #DCDCDC;
+    }
+
+.buttonRTP {
+    width: 45%;
+    font-size: 14px;
+    font-weight: bold;
+    /*margin-left: 112px;
+    margin-bottom: 15px;*/
+
+}
+
+.nameRTP {
+    margin-bottom: 2%;
+    margin-right: 10%;
+    direction: rtl;
+    text-align: right;
+    font-size: 15px;
+}
+
+.RTP {
+    direction: rtl;
+    margin-left: 65%;
+}
+
+
+p {
+
+    font-size: 15px;
+    text-align: right;
+    padding-right: 15px;
+
+}
+
+
+.logoF {
+    /*margin-left:87%;*/
+    width: 110px;
+    height: 80px;
+    direction: rtl;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+hr {
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    border-top: 2px solid rgba(0,0,0,.1);
+}
+
+
+.icon-bar {
+    /*width: 100%;*/
+    /*background-color: #555;*/
+    overflow: auto;
+    direction: rtl;
+    text-align: right;
+    padding-right: 20px;
+    margin-top: 2%;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+    .icon-bar a {
+        /*        float: right;
+*/ width: 17%;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+        color: black;
+        font-size: 15px;
+        /*font-family: tahoma;*/
+        margin-left: 2%; /*ליאור הוסיפה*/
+    }
+
+        .icon-bar a:hover {
+            color: #000;
+        }
+
+#active {
+    color: #e21e25;
+}
+
+
+#logOut {
+    /*margin-right: 60%;*/
+    float: left;
+    padding: 10px 50px;
+}

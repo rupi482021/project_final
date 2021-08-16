@@ -1,0 +1,136 @@
+﻿.pull-left {
+    float: left;
+}
+
+#txtAnswer {
+    width: 100%;
+}
+
+#btnWaitingQuestions {
+    position: absolute;
+    right: 30px;
+    top: 30px;
+    font-family: Tahoma;
+}
+
+.answerBy {
+    margin-right: auto;
+    margin-left: -10px;
+}
+
+.search-area-wrapper {
+    z-index: -1;
+    position: relative;
+    background-size: 100%;
+    background-image: url('../Images/istockphoto.jpg');
+    min-height: 279px;
+    height: auto !important;
+    height: 279px;
+}
+
+
+
+.card-header:first-child {
+    background-color: #cccccc;
+    font-weight: bold;
+    font-family: Tahoma;
+    color: black;
+    font-size: 15px;
+}
+
+.card-body {
+    background-color: white;
+    font-family: Tahoma;
+    color: black;
+}
+
+b, strong {
+    font-size: 15px;
+}
+
+
+.search-area-wrapper .search-area {
+    padding: 50px 0;
+}
+
+.search-area-theme-option {
+    background-size: cover;
+    background-position: center;
+}
+
+h3 {
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fff;
+    text-align: center;
+}
+
+p {
+    font-size: 18px;
+    font-family: Tahoma;
+}
+
+h3.search-header {
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fff;
+    text-align: center;
+}
+
+p.search-tag-line {
+    font-family: Tahoma;
+    font-style: italic;
+    font-size: 12px;
+    line-height: 28px;
+    color: #fff;
+    text-align: center;
+}
+
+#btnAddQuestion {
+    width: 130px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: Tahoma;
+    margin-right: 10px;
+}
+
+.question-details {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+}
+
+
+.question-header {
+    min-height: 279px;
+    position: relative;
+    background-size: 100%;
+    background-image: url('../Images/istockphoto.jpg');
+    min-height: 279px;
+    padding-top: 80px;
+    color: #fff;
+    opacity: 0.9;
+}
+
+.swal2-container:not(.swal2-top):not(.swal2-top-start):not(.swal2-top-end):not(.swal2-top-left):not(.swal2-top-right):not(.swal2-center-start):not(.swal2-center-end):not(.swal2-center-left):not(.swal2-center-right):not(.swal2-bottom):not(.swal2-bottom-start):not(.swal2-bottom-end):not(.swal2-bottom-left):not(.swal2-bottom-right):not(.swal2-grow-fullscreen) > .swal2-modal {
+    font-family: Tahoma;
+}
+
+#btnSearchQuestion {
+    width: 22%;
+    color: #fff;
+    font-family: Tahoma;
+    background-color: #e21e25;
+    border-color: #e21e25;
+}
+
+#btnClearSearch {
+    width: 15%;
+    color: #fff;
+    font-family: Tahoma;
+    background-color: #332c2c;
+    border-color: #332c2c;
+}

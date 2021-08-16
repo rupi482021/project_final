@@ -1,0 +1,162 @@
+﻿body {
+    direction: rtl;
+    font-family: Tahoma, Arial, sans-serif;
+    text-align: right;
+}
+
+.pForm {
+    margin-top: 2%;
+    background-color: white;
+    opacity: 0.77;
+    padding: 13px;
+    width: 35%;
+    margin-left: 250px;
+    border-radius: 7px;
+    text-align: right;
+    font-family: tahoma
+}
+
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+.red-star {
+    color: #fe0000;
+    font-size: 15px;
+    text-align: right;
+}
+
+button {
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: medium;
+    background-color: #C55545;
+    color: white;
+}
+
+.button {
+    background-color: #e21e25;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-right: 41%;
+}
+
+    .button:hover,
+    .button:focus {
+        color: white;
+        background-color: #212529;
+        border-bottom-color: #DCDCDC;
+    }
+
+
+
+.label {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.CF {
+    text-align: center;
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: 30px;
+    color: #4f4d4d;
+}
+
+.input {
+    background-color: white;
+}
+
+form {
+    border: solid 3px gray;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 35px;
+}
+
+#pForm {
+    width: 80%;
+    margin-right: 10%;
+    text-align: right;
+}
+
+
+.form-control {
+    text-align: right;
+}
+
+
+input[type=date], input[type=datetime-local], input[type=month], input[type=time] {
+    text-align: right;
+}
+
+.pSafety {
+    font-size: 11px;
+    background-color: #DCDCDC;
+}
+
+
+.logoF {
+    /*margin-top: 2%;*/
+    /*margin-left:87%;*/
+    width: 110px;
+    height: 80px;
+    direction: rtl;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+hr {
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    border-top: 2px solid rgba(0,0,0,.1);
+}
+.icon-bar {
+    /*width: 100%;*/
+    /*background-color: #555;*/
+    overflow: auto;
+    direction: rtl;
+    text-align: right;
+    padding-right: 20px;
+    margin-top: 2%;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+    .icon-bar a {
+        /*        float: right;
+*/ width: 17%;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+        color: black;
+        font-size: 15px;
+        font-family: tahoma;
+        margin-left: 2%; /*ליאור הוסיפה*/
+    }
+
+        .icon-bar a:hover {
+            color: #000;
+        }
+
+#active {
+    color: #e21e25;
+}
+
+#logOut {
+    /*margin-right: 60%;*/
+    float: left;
+    padding: 10px 50px;
+}

@@ -1,0 +1,116 @@
+﻿body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 15px 15px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #e21e25;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 30%;
+    border-radius: 8px;
+    margin-right: 35%;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 15px;
+    font-family: Tahoma;
+}
+
+    button:hover {
+        opacity: 0.8;
+    }
+
+
+
+.imgcontainer {
+    text-align: center;
+    margin: 24px 0 12px 0;
+}
+
+img.avatar {
+    width: 10%;
+    border-radius: 50%;
+}
+
+.container {
+    margin-top: 3%;
+    background-color: white;
+    opacity: 0.95;
+    padding: 25px;
+    padding-top: 30px;
+    width: 35%;
+    margin-left: 32%;
+    border-radius: 7px;
+    direction: rtl;
+    background-color: #020202;
+    font-family: Tahoma;
+}
+
+span.psw {
+    float: right;
+    padding-top: 40px;
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+    span.psw {
+        display: block;
+        float: none;
+    }
+
+    .cancelbtn {
+        width: 100%;
+    }
+}
+
+h1 {
+    text-align: center;
+    color: #3b3636;
+    font-size: 40px;
+    font-family: Tahoma;
+    /*margin-top: 70px;*/
+    margin-top: 95px;
+}
+
+a {
+    color: black;
+    font-weight: bold;
+}
+
+
+/*.swal-footer {
+    padding: 15px 45px;
+
+}*/
+
+.swal-button {
+    padding-left: 26px;
+    padding: 11px 70px 11px 54px;
+}
+
+img {
+    height: 170px;
+    width: 290px;
+}
+
+.logo {
+    margin-left: 41%;
+    padding-top: 2%;
+}
+
+.white {
+    color: white;
+}

@@ -1,0 +1,137 @@
+﻿body {
+    direction:rtl;
+}
+
+.pForm {
+    margin-top: 2%;
+    background-color: white;
+    opacity: 0.77;
+    padding: 13px;
+    width: 35%;
+    margin-left: 250px;
+    border-radius: 7px;
+    text-align: right;
+}
+
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+.red-star {
+    color: #fe0000;
+    font-size: 15px;
+    text-align: right;
+}
+
+button {
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: medium;
+    background-color: #C55545;
+    color: white;
+}
+
+.button {
+    background-color: #e21e25;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-right: 37%;
+}
+
+    .button:hover,
+    .button:focus {
+        color: white;
+        background-color: #212529;
+        border-bottom-color: #DCDCDC;
+    }
+
+
+
+.label {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.CF {
+    text-align: center;
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: 30px;
+    color: #4f4d4d;
+    /*text-shadow: 3px 3px 3px #130806;*/
+}
+
+.input {
+    background-color: white;
+}
+
+form {
+    border: solid 3px gray;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 35px;
+}
+
+.logoF {
+    margin-bottom: 10px;
+    /*position: absolute;*/
+    left: 20%;
+    top: 50px;
+    width: 110px;
+    height: 80px;
+}
+
+.picF {
+    margin-bottom: 10px;
+    position: absolute;
+    left: 20%;
+    top: 50px;
+    width: 110px;
+    height: 100px;
+}
+
+#pForm {
+    width: 80%;
+    margin-right: 10%;
+    text-align: right;
+}
+
+
+#homeP {
+    color: #373434;
+    font-size: 15px;
+    font-weight: bold;
+    margin-left: 90%;
+}
+
+
+
+.form-control{
+    text-align: right;
+}
+
+
+.pSafety {
+
+    font-size: 11px;
+    background-color: #DCDCDC;
+}
+
+input[type=date], input[type=datetime-local], input[type=month], input[type=time] {
+
+    text-align:right;
+}
